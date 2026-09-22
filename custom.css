@@ -1,0 +1,116 @@
+/* =====================================================================
+   MARQUEE (Home page)
+   ===================================================================== */
+
+.marquee-wrap {
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+    mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+}
+
+.marquee-track {
+    display: flex;
+    gap: 18px;
+    width: max-content;
+    animation: marquee-scroll 40s linear infinite;
+}
+
+/* Pause on hover so a card can actually be clicked mid-scroll */
+.marquee-wrap:hover .marquee-track {
+    animation-play-state: paused;
+}
+
+@keyframes marquee-scroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); } /* -50% because the card list is duplicated once */
+}
+
+/* =====================================================================
+   MODAL SHOW/HIDE + FADE (Tailwind handles everything else about these)
+   ===================================================================== */
+
+.pack-modal-overlay,
+.detail-modal-overlay {
+    display: none;
+    background: rgba(23, 15, 10, 0);
+    transition: background 0.35s ease;
+}
+
+.pack-modal-overlay.active,
+.pack-modal-overlay.closing,
+.detail-modal-overlay.active,
+.detail-modal-overlay.closing {
+    display: flex;
+}
+
+.pack-modal-overlay.active,
+.detail-modal-overlay.active {
+    background: rgba(23, 15, 10, 0.85);
+}
+
+.pack-reveal,
+.detail-modal-card {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.pack-modal-overlay.active .pack-reveal,
+.detail-modal-overlay.active .detail-modal-card {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.pack-modal-overlay.closing .pack-reveal,
+.detail-modal-overlay.closing .detail-modal-card {
+    opacity: 0;
+    transform: translateY(30px);
+}
+
+/* =====================================================================
+   3D CARD FLIP (Tailwind has no utilities for backface-visibility
+   or transform-style: preserve-3d)
+   ===================================================================== */
+
+.reveal-card-inner {
+    width: 260px;
+    height: 364px;
+    perspective: 1200px;
+    cursor: pointer;
+}
+
+.reveal-card-flipper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.reveal-card-flipper.flipped {
+    transform: rotateY(180deg);
+}
+
+.reveal-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.reveal-face-front {
+    transform: rotateY(180deg);
+}
+
+/* =====================================================================
+   RARITY GLOW
+   Kept as classes (rather than inline Tailwind arbitrary shadows)
+   since the same three values are reused across several places.
+   ===================================================================== */
+
+.glow-rare { box-shadow: 0 0 16px rgba(93, 143, 194, 0.4); }
+.glow-epic { box-shadow: 0 0 20px rgba(179, 111, 191, 0.45); }
+.glow-legendary { box-shadow: 0 0 24px rgba(232, 150, 61, 0.55); }

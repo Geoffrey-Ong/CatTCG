@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cat TCG — Battle Owners</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        void: '#221A12',
+                        voidDeep: '#170F0A',
+                        voidRaised: '#2E2318',
+                        beige: '#EFE3CB',
+                        beigeDeep: '#E4D5B0',
+                        ink: '#2B2018',
+                        inkSoft: '#7A6A54',
+                        orange: '#E8963D',
+                        orangeLight: '#F5B66B',
+                        rarityCommon: '#9C8F76',
+                        rarityUncommon: '#6FA37A',
+                        rarityRare: '#5D8FC2',
+                        rarityEpic: '#B36FBF',
+                        rarityLegendary: '#E8963D',
+                    },
+                    fontFamily: {
+                        display: ['"Baloo 2"', 'sans-serif'],
+                        body: ['Manrope', 'sans-serif'],
+                    }
+                }
+            }
+        };
+    </script>
+    <link rel="stylesheet" href="custom.css">
+</head>
+
+<body class="bg-void text-beige font-body min-h-screen">
+    <header class="bg-voidDeep border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-[1100px] mx-auto px-6 py-4 flex items-center gap-8">
+            <a href="index.html" class="flex items-center gap-2 font-display font-bold text-xl mr-auto text-beige no-underline">
+                <span class="text-2xl">🐾</span> Cat TCG
+            </a>
+            <nav class="flex gap-2">
+                <a href="index.html" class="px-3.5 py-2 rounded-full font-semibold text-sm text-inkSoft hover:text-beige hover:bg-white/5 no-underline transition">Home</a>
+                <a href="collection.html" class="px-3.5 py-2 rounded-full font-semibold text-sm text-inkSoft hover:text-beige hover:bg-white/5 no-underline transition">Collection</a>
+                <a href="inventory.html" class="px-3.5 py-2 rounded-full font-semibold text-sm text-inkSoft hover:text-beige hover:bg-white/5 no-underline transition">Inventory</a>
+                <a href="battle.html" class="px-3.5 py-2 rounded-full font-semibold text-sm bg-orange text-voidDeep no-underline">Battle Owners</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="max-w-[480px] mx-auto text-center px-6 pt-20">
+        <p class="text-inkSoft mb-1">Battle Owners</p>
+        <p class="font-display text-3xl font-bold mb-4">Coming soon</p>
+        <p class="text-inkSoft">
+            The battle system is being built next — you'll be able to challenge other cat
+            owners using your collected cards and their stats and moves.
+        </p>
+    </section>
+</body>
+
+</html>
