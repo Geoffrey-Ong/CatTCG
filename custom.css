@@ -30,7 +30,8 @@
    ===================================================================== */
 
 .pack-modal-overlay,
-.detail-modal-overlay {
+.detail-modal-overlay,
+.team-picker-overlay {
     display: none;
     background: rgba(23, 15, 10, 0);
     transition: background 0.35s ease;
@@ -39,30 +40,36 @@
 .pack-modal-overlay.active,
 .pack-modal-overlay.closing,
 .detail-modal-overlay.active,
-.detail-modal-overlay.closing {
+.detail-modal-overlay.closing,
+.team-picker-overlay.active,
+.team-picker-overlay.closing {
     display: flex;
 }
 
 .pack-modal-overlay.active,
-.detail-modal-overlay.active {
+.detail-modal-overlay.active,
+.team-picker-overlay.active {
     background: rgba(23, 15, 10, 0.85);
 }
 
 .pack-reveal,
-.detail-modal-card {
+.detail-modal-card,
+.team-picker-card {
     opacity: 0;
     transform: translateY(30px);
     transition: opacity 0.35s ease, transform 0.35s ease;
 }
 
 .pack-modal-overlay.active .pack-reveal,
-.detail-modal-overlay.active .detail-modal-card {
+.detail-modal-overlay.active .detail-modal-card,
+.team-picker-overlay.active .team-picker-card {
     opacity: 1;
     transform: translateY(0);
 }
 
 .pack-modal-overlay.closing .pack-reveal,
-.detail-modal-overlay.closing .detail-modal-card {
+.detail-modal-overlay.closing .detail-modal-card,
+.team-picker-overlay.closing .team-picker-card {
     opacity: 0;
     transform: translateY(30px);
 }
@@ -114,3 +121,160 @@
 .glow-rare { box-shadow: 0 0 16px rgba(93, 143, 194, 0.4); }
 .glow-epic { box-shadow: 0 0 20px rgba(179, 111, 191, 0.45); }
 .glow-legendary { box-shadow: 0 0 24px rgba(232, 150, 61, 0.55); }
+
+/* =====================================================================
+   API STATUS LED (header, every page)
+   ===================================================================== */
+
+.status-led {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: #7A6A54; /* inkSoft — the "unknown" state */
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-led.online {
+    background: #4ADE80;
+    box-shadow: 0 0 8px rgba(74, 222, 128, 0.7);
+}
+
+.status-led.offline {
+    background: #EF4444;
+    box-shadow: 0 0 8px rgba(239, 68, 68, 0.7);
+}
+
+.status-led.checking {
+    animation: led-pulse 1s ease-in-out infinite;
+}
+
+@keyframes led-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .status-led.checking { animation: none; }
+}
+
+/* =====================================================================
+   ICONS
+   The PNGs are solid black on transparent. Used as a mask over a
+   currentColor background, so an icon takes on the text color of
+   whatever it sits in (same technique as the Cat Takers hero icons).
+   The mask-image itself is set inline per icon (see iconHTML in shared.js).
+   ===================================================================== */
+
+.icon {
+    display: inline-block;
+    flex-shrink: 0;
+    background-color: currentColor;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
+}
+
+/* =====================================================================
+   HOVER TOOLTIP
+   Add class "has-tooltip" + data-tooltip="text" to any element that is
+   already positioned (relative/absolute) and it gets a label on hover,
+   keyboard focus, or tap. Sits below the element, right-aligned.
+   ===================================================================== */
+
+.has-tooltip::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    z-index: 10;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #170F0A;
+    color: #EFE3CB;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-2px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.has-tooltip:hover::after,
+.has-tooltip:focus::after {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* =====================================================================
+   BATTLE ANIMATIONS
+   All triggered from JS by adding/removing these classes, except
+   .banner-pop which is static (its parent toggles display:none, and a
+   CSS animation naturally replays once an element re-enters layout).
+   ===================================================================== */
+
+@keyframes shake-hit {
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-8px); }
+    40%, 60% { transform: translateX(8px); }
+}
+.shake-hit { animation: shake-hit 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+
+@keyframes flash-hit {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.8) saturate(0.2); }
+}
+.flash-hit { animation: flash-hit 0.35s ease-in-out; }
+
+@keyframes flash-heal {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.5) saturate(1.4); }
+}
+.flash-heal { animation: flash-heal 0.5s ease-in-out; }
+
+@keyframes swap-in {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.swap-in { animation: swap-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+
+@keyframes faint-drop {
+    0% { transform: translateY(0) rotate(0deg); }
+    100% { transform: translateY(6px) rotate(-4deg); }
+}
+.faint-drop { animation: faint-drop 0.5s ease-in forwards; }
+
+@keyframes banner-pop {
+    0% { transform: scale(0.85); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.banner-pop { animation: banner-pop 0.3s ease-out; }
+
+@keyframes float-up-fade {
+    0% { transform: translate(-50%, 0); opacity: 1; }
+    100% { transform: translate(-50%, -28px); opacity: 0; }
+}
+.floating-number {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    font-family: 'Baloo 2', sans-serif;
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    z-index: 20;
+    animation: float-up-fade 0.9s ease-out forwards;
+}
+.floating-number.damage { color: #EF4444; }
+.floating-number.heal { color: #4ADE80; }
+
+@media (prefers-reduced-motion: reduce) {
+    .shake-hit, .flash-hit, .flash-heal, .swap-in, .faint-drop, .banner-pop, .floating-number {
+        animation: none !important;
+    }
+}

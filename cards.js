@@ -11,20 +11,11 @@ const STAT_CONFIG = {
         friendlinessMultiplier: 9, // each point of friendliness_level adds this much HP
         randomRange: 12,
     },
-    attack: {
-        base: 30,
-        randomRange: 40,
-        notForAdoptionBonus: 10, // extra attack if good_for_adoption is "No"
-    },
     defense: {
         base: 25,
         healthyBonus: 15,   // bonus if previous_health_conditions is "None"
         unhealthyBonus: 5,  // bonus otherwise
         randomRange: 20,
-    },
-    speed: {
-        base: 20,
-        randomRange: 50,
     },
 };
 
@@ -64,26 +55,26 @@ const RARITY_PULL_WEIGHTS = {
 // so adding a new cat to the API won't break anything.
 // -----------------------------------------------------------------
 const CUSTOM_MOVES = {
-    1:  [{ name: "Bonito Barrage", power: 32 }, { name: "Beach Sprint", power: 22 }],       // Whiskers
-    2:  [{ name: "Yarn Ball Tangle", power: 28 }, { name: "Fish Frenzy", power: 30 }],       // Luna
-    3:  [{ name: "Soul Devourer", power: 38 }, { name: "Slipper Shred", power: 24 }],        // Simba
-    4:  [{ name: "Midnight Stab", power: 34 }, { name: "Deep Sleep", power: 18 }],           // Bacteria
-    5:  [{ name: "Nugget Nom", power: 26 }, { name: "Food Frenzy", power: 30 }],             // Chromosome
-    6:  [{ name: "17-Hour Nap", power: 15 }, { name: "Grumpy Slap", power: 30 }],            // Biggie Cheese
-    7:  [{ name: "Sunbeam Bask", power: 20 }, { name: "Water Splash", power: 24 }],          // Burmese Python
-    8:  [{ name: "Throne Stare", power: 28 }, { name: "Royal Decree", power: 26 }],          // King
-    9:  [{ name: "Cheese Wheel Roll", power: 30 }, { name: "Cheddar Charge", power: 26 }],   // Larry
-    10: [{ name: "Larry's Bane", power: 36 }, { name: "Egg Toss", power: 22 }],              // Evil Larry
-    11: [{ name: "Meatball Meteor", power: 30 }, { name: "Park Pounce", power: 24 }],        // Irish
-    12: [{ name: "Crunch Bite", power: 28 }, { name: "Plant Pounce", power: 22 }],           // Poppy
-    13: [{ name: "Rooftop Leap", power: 26 }, { name: "Storm Cower", power: 16 }],           // Mort
-    14: [{ name: "Gentle Nuzzle", power: 22 }, { name: "Perfect Precision", power: 34 }],    // Wart
-    15: [{ name: "Sandy Scamper", power: 24 }, { name: "Beach Body Slam", power: 28 }],      // Lexi
-    16: [{ name: "Ear Scratch Combo", power: 20 }, { name: "Quiet Retreat", power: 18 }],    // Bob
-    17: [{ name: "Cheesestick Charge", power: 28 }, { name: "Underdog Uppercut", power: 32 }], // Ratt
-    18: [{ name: "Solar Flare", power: 34 }, { name: "Rain Dodge", power: 20 }],             // Hercules
-    19: [{ name: "Whispering Voices", power: 36 }, { name: "Midnight Watch", power: 30 }],   // Satan
-    20: [{ name: "Dumpling Toss", power: 26 }, { name: "Nap Attack", power: 18 }],           // Terry
+    1:  [{ name: "Salmonella Breath", power: 35 }, { name: "Claw Slash", power: 20 }],       // Whiskers
+    2:  [{ name: "Gay Beam", power: 1 }, { name: "Claw Slash", power: 20 }],                // Luna
+    3:  [{ name: "Vase Throw", power: 40 }, { name: "Head Bump", power: 10 }],               // Simba
+    4:  [{ name: "Gay Beam", power: 1 }, { name: "Head Bump", power: 10 }],                 // Bacteria
+    5:  [{ name: "Tuna Mukbang", power: 30 }, { name: "Head Bump", power: 10 }],             // Chromosome
+    6:  [{ name: "Tuna Mukbang", power: 30 }, { name: "Head Bump", power: 10 }],             // Biggie Cheese
+    7:  [{ name: "Catnip Distribution", power: 20 }, { name: "Claw Slash", power: 20 }],     // Burmese Python
+    8:  [{ name: "Political Stance", power: 1 }, { name: "Claw Slash", power: 20 }],        // King
+    9:  [{ name: "Salmonella Breath", power: 35 }, { name: "Claw Slash", power: 20 }],       // Larry
+    10: [{ name: "Vase Throw", power: 40 }, { name: "Head Bump", power: 10 }],               // Evil Larry
+    11: [{ name: "Vase Throw", power: 40 }, { name: "Head Bump", power: 10 }],               // Irish
+    12: [{ name: "Cute Eyes", power: 1 }, { name: "Claw Slash", power: 20 }],               // Poppy
+    13: [{ name: "Cute Eyes", power: 1 }, { name: "Head Bump", power: 10 }],                // Mort
+    14: [{ name: "Catnip Distribution", power: 20 }, { name: "Head Bump", power: 10 }],      // Wart
+    15: [{ name: "Salmonella Breath", power: 35 }, { name: "Claw Slash", power: 20 }],       // Lexi
+    16: [{ name: "Tuna Mukbang", power: 30 }, { name: "Claw Slash", power: 20 }],            // Bob
+    17: [{ name: "Vase Throw", power: 40 }, { name: "Head Bump", power: 10 }],               // Ratt
+    18: [{ name: "Salmonella Breath", power: 35 }, { name: "Claw Slash", power: 20 }],       // Hercules
+    19: [{ name: "Political Stance", power: 1 }, { name: "Head Bump", power: 10 }],         // Satan
+    20: [{ name: "Catnip Distribution", power: 20 }, { name: "Claw Slash", power: 20 }],     // Terry
 };
 
 // Used for any cat id not listed in CUSTOM_MOVES above.
@@ -91,6 +82,80 @@ const DEFAULT_MOVES = [
     { name: "Paw Swipe", power: 20 },
     { name: "Hiss", power: 15 },
 ];
+
+// -----------------------------------------------------------------
+// MOVE INFO (hover tooltip text + treat cost)
+// Keyed by move name rather than cat id, since several cats share the
+// same move (e.g. "Claw Slash"). A move with treatCost: 0 renders as
+// "Free" in the detail modal instead of treat icons.
+// -----------------------------------------------------------------
+const MOVE_INFO = {
+    "Claw Slash": { description: "A basic slashing attack.", treatCost: 1, type: "damage" },
+    "Head Bump": { description: "A basic headbutt attack.", treatCost: 0, type: "damage" },
+    "Tuna Mukbang": { description: "Heals the cat's HP by devouring tuna.", treatCost: 2, type: "heal" },
+    "Catnip Distribution": { description: "Removes any negative status effects (de-buffs).", treatCost: 2, type: "heal" },
+    "Cute Eyes": { description: "Distracts the Owner for 2 turns.", treatCost: 2, type: "utility" },
+    // Treat cost not specified in the move notes — defaulted to match the other Utility moves.
+    "Gay Beam": { description: "20% chance to instantly defeat the boss, but a 10% chance it backfires and wipes out the whole team.", treatCost: 2, type: "utility" },
+    "Political Stance": { description: "Distracts the Owner for 1 turn.", treatCost: 1, type: "utility" },
+    "Salmonella Breath": { description: "A damaging attack with a chance to inflict After-smell.", treatCost: 2, type: "damage" },
+    "Vase Throw": { description: "A powerful throwing attack.", treatCost: 2, type: "damage" },
+};
+
+// Fallback for any move name not listed in MOVE_INFO above 
+const DEFAULT_MOVE_INFO = { description: "", treatCost: 0, type: "damage" };
+
+// -----------------------------------------------------------------
+// CUSTOM ROLES
+// One role per cat, keyed by the cat's id from the API. Valid roles are
+// the keys of ROLE_LABELS below ("damage", "heal", "utility"). Any cat
+// whose id isn't listed falls back to DEFAULT_ROLE.
+// -----------------------------------------------------------------
+const CUSTOM_ROLES = {
+    1:  "damage",   // Whiskers
+    2:  "utility",  // Luna
+    3:  "damage",   // Simba
+    4:  "damage",   // Bacteria
+    5:  "heal",     // Chromosome
+    6:  "heal",     // Biggie Cheese
+    7:  "heal",     // Burmese Python
+    8:  "utility",  // King
+    9:  "damage",   // Larry
+    10: "damage",   // Evil Larry
+    11: "damage",   // Irish
+    12: "utility",  // Poppy
+    13: "utility",  // Mort
+    14: "heal",     // Wart
+    15: "damage",   // Lexi
+    16: "heal",     // Bob
+    17: "damage",   // Ratt
+    18: "damage",   // Hercules
+    19: "utility",  // Satan
+    20: "heal",     // Terry
+};
+
+const DEFAULT_ROLE = "damage";
+
+const ROLE_LABELS = {
+    damage: "Damage",
+    heal: "Heal",
+    utility: "Utility",
+};
+
+// Icon files live in the icons/ folder next to the HTML pages.
+const ROLE_ICONS = {
+    damage: "icons/Attack.png",
+    heal: "icons/Heal.png",
+    utility: "icons/Utility.png",
+};
+
+const STAT_ICONS = {
+    hp: "icons/HP.png",
+    defense: "icons/Defence.png",
+};
+
+const MOVE_POWER_ICON = "icons/Atk.png"; // shown beside each move's power number
+const TREAT_ICON = "icons/snack.png"; // shown once per treat a move costs, in the detail modal
 
 // =====================================================================
 // CARD GENERATION
@@ -109,6 +174,12 @@ const RARITY_LABELS = {
     rare: "Rare",
     epic: "Epic",
     legendary: "Legendary",
+};
+
+// Display names for each stat key in card.stats (used by the detail modal).
+const STAT_LABELS = {
+    hp: "HP",
+    defense: "Defense",
 };
 
 // Tailwind classes per rarity tier, used when building card markup in JS.
@@ -136,7 +207,15 @@ function mulberry32(seed) {
 }
 
 function getMoves(cat) {
-    return CUSTOM_MOVES[cat.id] || DEFAULT_MOVES;
+    const moves = CUSTOM_MOVES[cat.id] || DEFAULT_MOVES;
+    return moves.map((move) => ({
+        ...move,
+        ...(MOVE_INFO[move.name] || DEFAULT_MOVE_INFO),
+    }));
+}
+
+function getRole(cat) {
+    return CUSTOM_ROLES[cat.id] || DEFAULT_ROLE;
 }
 
 // Rarity leans on real traits: cats not currently up for adoption, or
@@ -175,21 +254,10 @@ function generateCard(cat) {
         roll() * STAT_CONFIG.hp.randomRange
     );
 
-    const attack = Math.round(
-        STAT_CONFIG.attack.base +
-        roll() * STAT_CONFIG.attack.randomRange +
-        (cat.good_for_adoption === "No" ? STAT_CONFIG.attack.notForAdoptionBonus : 0)
-    );
-
     const defense = Math.round(
         STAT_CONFIG.defense.base +
         (cat.previous_health_conditions === "None" ? STAT_CONFIG.defense.healthyBonus : STAT_CONFIG.defense.unhealthyBonus) +
         roll() * STAT_CONFIG.defense.randomRange
-    );
-
-    const speed = Math.round(
-        STAT_CONFIG.speed.base +
-        roll() * STAT_CONFIG.speed.randomRange
     );
 
     return {
@@ -199,7 +267,8 @@ function generateCard(cat) {
         image: cat.image,
         description: cat.description,
         rarity,
-        stats: { hp, attack, defense, speed },
+        role: getRole(cat),
+        stats: { hp, defense },
         moves: getMoves(cat),
     };
 }
@@ -243,6 +312,36 @@ function unlockCard(id) {
         saveCollection(collection);
     }
     return collection;
+}
+
+// =====================================================================
+// BATTLE TEAM STORAGE (localStorage)
+//
+// The 3 cats picked for Battle, in deploy order — index 0 deploys
+// first. Kept in its own key so clearing/rebuilding the Collection
+// never touches the current battle team, and vice versa.
+// =====================================================================
+
+const BATTLE_TEAM_STORAGE_KEY = "catTCG_battleTeam";
+const BATTLE_TEAM_SIZE = 3;
+
+function getBattleTeam() {
+    try {
+        const raw = localStorage.getItem(BATTLE_TEAM_STORAGE_KEY);
+        const team = raw ? JSON.parse(raw) : [];
+        return Array.isArray(team) ? team : [];
+    } catch (error) {
+        console.error("Could not read battle team from localStorage:", error);
+        return [];
+    }
+}
+
+function saveBattleTeam(cardIds) {
+    try {
+        localStorage.setItem(BATTLE_TEAM_STORAGE_KEY, JSON.stringify(cardIds.slice(0, BATTLE_TEAM_SIZE)));
+    } catch (error) {
+        console.error("Could not save battle team to localStorage:", error);
+    }
 }
 
 // =====================================================================

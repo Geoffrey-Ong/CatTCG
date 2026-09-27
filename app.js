@@ -7,13 +7,28 @@ let pendingPackCard = null;
 async function init() {
     try {
         await loadAllCards();
-        renderMarquee();
+        renderAll();
     } catch (error) {
         console.error(error);
         document.getElementById("marqueeTrack").innerHTML =
-            `<p class="text-inkSoft px-6">Unable to connect to the API.</p>`;
+            `<p class="text-inkSoft px-6">Unable to connect to the API. Use "Load from file" below if you have a previously exported cache.</p>`;
+        document.getElementById("cardGrid").innerHTML =
+            "Unable to connect to the API. Use \"Load from file\" below if you have a previously exported cache.";
     }
 }
+
+// Renders every section of the Home page that depends on card data:
+// the owned-cards marquee up top, plus the collection progress, rarity
+// breakdown, and full grid that used to live on their own page.
+function renderAll() {
+    renderMarquee();
+    renderProgress();
+    renderRarityBreakdown();
+    renderCardGrid();
+}
+
+// Lets the "Load from file" button (in shared.js) refresh this page after an import
+window.onCatDataUpdated = renderAll;
 
 // =====================================================================
 // MARQUEE (only shows cats you actually own)
@@ -32,6 +47,55 @@ function renderMarquee() {
     const tilesHTML = unlockedCards.map((card) => cardTileHTML(card, "w-[150px]")).join("");
     track.innerHTML = tilesHTML + tilesHTML;
     wireCardTileClicks(track);
+}
+
+// =====================================================================
+// COLLECTION SECTION (moved here from the old collection.html/collection.js)
+// =====================================================================
+
+function renderProgress() {
+    const collection = getCollection();
+    const unlockedCount = collection.unlockedIds.length;
+    const totalCount = allCards.length;
+
+    document.getElementById("unlockedCount").textContent = unlockedCount;
+    document.getElementById("totalCount").textContent = totalCount;
+
+    const percent = totalCount ? (unlockedCount / totalCount) * 100 : 0;
+    document.getElementById("progressFill").style.width = `${percent}%`;
+}
+
+// Per-tier "owned / total" counts (e.g. Rare 4/7). Totals come from the
+// full generated card list, so they update automatically if rarity odds
+// in cards.js change or new cats are added to the API.
+function renderRarityBreakdown() {
+    const unlockedIds = getCollection().unlockedIds;
+
+    document.getElementById("rarityBreakdown").innerHTML = RARITY_ORDER.map((tier) => {
+        const cardsInTier = allCards.filter((card) => card.rarity === tier);
+        const total = cardsInTier.length;
+        const owned = cardsInTier.filter((card) => unlockedIds.includes(card.id)).length;
+        const style = RARITY_STYLES[tier];
+        const complete = total > 0 && owned === total;
+
+        return `
+            <div class="min-w-[96px] px-3.5 py-2.5 rounded-xl bg-voidRaised border-t-4 ${style.border} ${complete ? style.glow : ""} ${total === 0 ? "opacity-40" : ""}">
+                <p class="text-xs font-semibold text-inkSoft">${RARITY_LABELS[tier]}</p>
+                <p class="font-display text-xl font-bold">${owned}<span class="text-inkSoft"> / ${total}</span></p>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderCardGrid() {
+    const grid = document.getElementById("cardGrid");
+    const collection = getCollection();
+
+    grid.innerHTML = allCards
+        .map((card) => (collection.unlockedIds.includes(card.id) ? cardTileHTML(card) : lockedTileHTML()))
+        .join("");
+
+    wireCardTileClicks(grid);
 }
 
 // =====================================================================
@@ -69,6 +133,7 @@ function flipRevealCard() {
     if (flipper.classList.contains("flipped")) return; // already revealed
 
     flipper.classList.add("flipped");
+    playRarityStinger(pendingPackCard.rarity); // on reveal, not on open, so it doesn't spoil the rarity
     unlockCard(pendingPackCard.id);
     document.getElementById("packModalHint").textContent = "Added to your collection!";
 }
@@ -83,7 +148,7 @@ function closePackModal() {
     }, 350);
 
     pendingPackCard = null;
-    renderMarquee(); // picks up the newly unlocked card, if one was opened
+    renderAll(); // picks up the newly unlocked card in the marquee AND the collection section
 }
 
 function handlePackOverlayClick(event) {
