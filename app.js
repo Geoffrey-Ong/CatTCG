@@ -11,9 +11,9 @@ async function init() {
     } catch (error) {
         console.error(error);
         document.getElementById("marqueeTrack").innerHTML =
-            `<p class="text-inkSoft px-6">Unable to connect to the API. Use "Load from file" below if you have a previously exported cache.</p>`;
+            `<p class="text-inkSoft px-6">Unable to connect to the API.</p>`;
         document.getElementById("cardGrid").innerHTML =
-            "Unable to connect to the API. Use \"Load from file\" below if you have a previously exported cache.";
+            "Unable to connect to the API.";
     }
 }
 

@@ -16,151 +16,50 @@ const API_STATUS_POLL_INTERVAL_MS = 30000; // how often the LED re-checks the AP
 const API_STATUS_TIMEOUT_MS = 6000;        // a check slower than this counts as "offline"
 
 let allCards = [];
-let lastFetchedCatData = null;   // raw cat objects from the most recent successful fetch or file import
-let usingCachedCatData = false;  // true when allCards came from an imported file, not a live fetch
+let lastFetchedCatData = null;   // raw cat objects from the most recent load (live API or cache file)
+let usingCachedCatData = false;  // true when allCards came from cache/cats.json, not the live API
 
-// Pages that render cards (Home) set this to their own render function, so
-// that loading a file from the "Load from file" button can refresh what's
-// on screen without extra file-picker wiring on each page.
-window.onCatDataUpdated = null;
+// Bundled JSON file used when the live API can't be reached. Replace this
+// file whenever you want fresher cat data.
+const CACHE_FILE_URL = "cache/cats.json";
+
+// Try the live API first; if it fails, read the bundled JSON file instead.
+async function fetchCatsWithFallback(fetchOptions) {
+    try {
+        const response = await fetch(`${API_URL}/cats`, fetchOptions);
+        if (!response.ok) throw new Error("API request failed.");
+        const data = await response.json();
+        usingCachedCatData = false;
+        return data.cats;
+    } catch (apiError) {
+        console.warn("API unavailable, using cache file:", apiError);
+        const response = await fetch(CACHE_FILE_URL);
+        if (!response.ok) throw apiError; // no cache file either
+        const data = await response.json();
+        usingCachedCatData = true;
+        return data.cats;
+    }
+}
 
 // Used by the Home / Collection page.
 async function loadAllCards() {
-    const response = await fetch(`${API_URL}/cats`, COLLECTION_FETCH_OPTIONS);
-    if (!response.ok) throw new Error("API request failed.");
-    const data = await response.json();
-
-    lastFetchedCatData = data.cats;
-    usingCachedCatData = false;
-    allCards = data.cats.map(generateCard);
-    setCacheStatus(""); // live data — clear any "loaded from file" note
+    const cats = await fetchCatsWithFallback(COLLECTION_FETCH_OPTIONS);
+    lastFetchedCatData = cats;
+    allCards = cats.map(generateCard);
     return allCards;
 }
 
-// Not called yet — ready for when the Battle system starts fetching cat
-// data of its own, authenticated with the Battle page's own key.
+// Used by the Battle page (Owners / fights).
 async function loadAllCardsAsBattle() {
-    const response = await fetch(`${API_URL}/cats`, BATTLE_FETCH_OPTIONS);
-    if (!response.ok) throw new Error("API request failed.");
-    const data = await response.json();
-
-    lastFetchedCatData = data.cats;
-    usingCachedCatData = false;
-    allCards = data.cats.map(generateCard);
-    setCacheStatus("");
+    const cats = await fetchCatsWithFallback(BATTLE_FETCH_OPTIONS);
+    lastFetchedCatData = cats;
+    allCards = cats.map(generateCard);
     return allCards;
 }
 
 function getUnlockedCards() {
     const collection = getCollection();
     return allCards.filter((card) => collection.unlockedIds.includes(card.id));
-}
-
-// =====================================================================
-// DOWNLOADABLE JSON CACHE
-// Export writes whatever cat data is currently in memory to a .json file
-// via a normal browser download, triggered only by the button below (not
-// automatic — a save on every page load got noisy fast). Import reads a
-// previously exported file back in through a file picker, so the app
-// keeps working with the API offline. Neither touches localStorage — the
-// file itself is the only copy.
-// =====================================================================
-
-// Chrome and Firefox will create/use a subfolder inside your Downloads
-// folder when the download filename contains a slash — Safari mostly
-// ignores the folder part and just uses the base filename. There's no way
-// for browser JS to write to an arbitrary absolute path on disk; this is
-// the closest real equivalent.
-function buildCacheFilename() {
-    const now = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    const stamp = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}_${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
-    return `cache/cat-tcg-cache-${stamp}.json`;
-}
-
-function exportCatDataToFile() {
-    if (!lastFetchedCatData) {
-        alert("No cat data loaded yet — load the page while the API is online first, then export.");
-        return;
-    }
-
-    const payload = {
-        cats: lastFetchedCatData,
-        exportedAt: new Date().toISOString(),
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = buildCacheFilename();
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-}
-
-function importCatDataFromFile(file) {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => {
-            try {
-                const parsed = JSON.parse(reader.result);
-                if (!Array.isArray(parsed.cats)) {
-                    throw new Error("File doesn't look like a cat data export.");
-                }
-                lastFetchedCatData = parsed.cats;
-                usingCachedCatData = true;
-                allCards = parsed.cats.map(generateCard);
-                resolve(allCards);
-            } catch (error) {
-                reject(error);
-            }
-        };
-        reader.onerror = () => reject(reader.error);
-        reader.readAsText(file);
-    });
-}
-
-function setCacheStatus(text) {
-    const status = document.getElementById("cacheStatus");
-    if (!status) return;
-    status.textContent = text;
-    status.classList.toggle("hidden", !text);
-}
-
-// Export button, Import file picker, and a small status note — appended to
-// the very end of the page (after the footer and any modals), so pages
-// only need the <script> tag and don't need matching markup for it.
-function buildCacheControls() {
-    const container = document.createElement("div");
-    container.id = "cacheControl";
-    container.className = "max-w-[1100px] mx-auto px-6 pt-2 pb-10 flex flex-wrap items-center justify-center gap-2.5 text-xs";
-    container.innerHTML = `
-        <button id="exportCacheButton" type="button" class="px-2.5 py-1 rounded-full border border-white/10 text-inkSoft hover:text-beige hover:bg-white/5 transition">Export data (.json)</button>
-        <label for="importCacheInput" class="px-2.5 py-1 rounded-full border border-white/10 text-inkSoft hover:text-beige hover:bg-white/5 transition cursor-pointer">Load from file</label>
-        <input id="importCacheInput" type="file" accept="application/json,.json" class="hidden">
-        <span id="cacheStatus" class="hidden text-inkSoft"></span>
-    `;
-    document.body.appendChild(container);
-
-    container.querySelector("#exportCacheButton").addEventListener("click", exportCatDataToFile);
-
-    container.querySelector("#importCacheInput").addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        try {
-            await importCatDataFromFile(file);
-            setCacheStatus(`Loaded from ${file.name}`);
-            if (typeof window.onCatDataUpdated === "function") window.onCatDataUpdated();
-        } catch (error) {
-            console.error("Could not import cat data file:", error);
-            alert("That file doesn't look like a valid cat data export.");
-        }
-
-        event.target.value = ""; // allow re-selecting the same file later
-    });
 }
 
 // =====================================================================
@@ -362,4 +261,3 @@ function startApiStatusMonitor() {
 }
 
 startApiStatusMonitor();
-buildCacheControls();
