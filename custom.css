@@ -196,7 +196,10 @@
     color: #EFE3CB;
     font-size: 12px;
     font-weight: 700;
-    white-space: nowrap;
+    line-height: 1.3;
+    text-align: left;
+    width: max-content;
+    max-width: min(240px, 70vw); /* long move descriptions wrap instead of running off a phone screen */
     opacity: 0;
     pointer-events: none;
     transform: translateY(-2px);
@@ -207,6 +210,13 @@
 .has-tooltip:focus::after {
     opacity: 1;
     transform: translateY(0);
+}
+
+/* On touch screens, tapping a battle move button fires the move, so the
+   tooltip would just flash over the action. (Card details still show move
+   descriptions on tap.) */
+@media (hover: none) {
+    #moveButtons .has-tooltip::after { display: none; }
 }
 
 /* =====================================================================

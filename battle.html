@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Cat TCG — Battle Owners</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,14 +42,22 @@
 
 <body class="bg-void text-beige font-body min-h-screen">
     <header id="siteHeader" class="bg-voidDeep border-b border-white/10 sticky top-0 z-50">
-        <div class="max-w-[1100px] mx-auto px-6 py-4 flex items-center gap-8">
+        <div class="max-w-[1100px] mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center gap-4 md:gap-8">
             <a href="index.html" class="flex items-center gap-2 font-display font-bold text-xl mr-auto text-beige no-underline">
                 <span class="text-2xl">🐾</span> Cat TCG
             </a>
-            <nav class="flex gap-2">
-                <a href="index.html" class="px-3.5 py-2 rounded-full font-semibold text-sm text-inkSoft hover:text-beige hover:bg-white/5 no-underline transition">Home</a>
-                <a href="battle.html" class="px-3.5 py-2 rounded-full font-semibold text-sm bg-orange text-voidDeep no-underline">Battle Owners</a>
+
+            <!-- Bottom tab bar on phones, top pill nav from md (768px) up -->
+            <nav class="fixed bottom-0 inset-x-0 z-50 flex bg-voidDeep border-t border-white/10 pb-[env(safe-area-inset-bottom)]
+                        md:static md:z-auto md:bg-transparent md:border-0 md:pb-0 md:gap-2">
+                <a href="index.html" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 flex-1 md:flex-none py-2.5 md:px-3.5 md:py-2 md:rounded-full font-semibold text-xs md:text-sm no-underline transition text-inkSoft hover:text-beige md:hover:bg-white/5">
+                    <span class="text-xl md:hidden" aria-hidden="true">🏠</span>Home
+                </a>
+                <a href="battle.html" class="flex flex-col md:flex-row items-center justify-center gap-0.5 md:gap-2 flex-1 md:flex-none py-2.5 md:px-3.5 md:py-2 md:rounded-full font-semibold text-xs md:text-sm no-underline transition text-orange md:bg-orange md:text-voidDeep">
+                    <span class="text-xl md:hidden" aria-hidden="true">⚔️</span>Battle Owners
+                </a>
             </nav>
+
             <div id="apiStatus" class="flex items-center gap-2 text-xs text-inkSoft" title="Checking…">
                 <span id="apiStatusLed" class="status-led checking"></span>
                 <span id="apiStatusLabel" class="hidden sm:inline">Checking…</span>
@@ -57,25 +65,25 @@
         </div>
     </header>
 
-    <main id="battleLobby" class="max-w-[1100px] mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 items-start">
+    <main id="battleLobby" class="max-w-[1100px] mx-auto px-4 md:px-6 pt-6 pb-[calc(6rem+env(safe-area-inset-bottom))] md:py-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 lg:gap-10 items-start">
         <!-- BOSSES -->
         <section>
             <h1 class="font-display text-3xl font-bold mb-6">Bosses:</h1>
             <div id="bossList" class="flex flex-col gap-4"></div>
         </section>
 
-        <!-- YOUR TEAM -->
-        <section>
+        <!-- YOUR TEAM (shown above the bosses on phones) -->
+        <section class="order-first lg:order-none">
             <div class="flex items-center justify-between mb-3">
                 <p class="font-display font-bold text-lg">Your team</p>
                 <button type="button" onclick="openTeamPicker()" class="px-4 py-2 rounded-full bg-voidRaised border border-white/10 font-semibold text-sm hover:bg-white/5 transition">Change</button>
             </div>
-            <div id="teamSlots" class="flex flex-col gap-4"></div>
+            <div id="teamSlots" class="grid grid-cols-3 gap-3 lg:flex lg:flex-col lg:gap-4"></div>
         </section>
     </main>
 
     <!-- BATTLE SCREEN (hidden until a fight starts) -->
-    <section id="battleScreen" class="hidden max-w-[1000px] mx-auto px-6 py-6">
+    <section id="battleScreen" class="hidden max-w-[1000px] mx-auto px-4 sm:px-6 pt-4 sm:pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
         <!-- EXIT + OWNER HP -->
         <div class="flex items-center gap-4 mb-5">
             <button type="button" onclick="handleExitBattle()" class="shrink-0 px-3.5 py-2 rounded-full bg-voidRaised border border-white/10 font-semibold text-sm hover:bg-white/5 transition">&larr; Exit</button>
@@ -91,11 +99,14 @@
             </div>
         </div>
 
-        <!-- BATTLEFIELD: bench — active — owner (boss on the right), one row -->
-        <div class="flex items-center justify-center flex-wrap gap-4 sm:gap-6 md:gap-8 mb-5">
-            <div id="benchList" class="flex gap-2 sm:gap-3"></div>
-            <div id="activeFighterCard" class="shrink-0"></div>
-            <div id="ownerPortraitWrap" class="relative shrink-0">
+        <!-- BATTLEFIELD: phones stack the boss on top with bench + active below;
+             sm and up put bench, active, owner in one row (sm:contents dissolves the wrapper) -->
+        <div class="flex flex-col sm:flex-row items-center justify-center sm:flex-wrap gap-4 sm:gap-6 md:gap-8 mb-5">
+            <div class="flex items-center justify-center gap-3 sm:contents">
+                <div id="benchList" class="flex gap-2 sm:gap-3"></div>
+                <div id="activeFighterCard" class="shrink-0"></div>
+            </div>
+            <div id="ownerPortraitWrap" class="relative shrink-0 order-first sm:order-none">
                 <div id="ownerPortrait" class="w-28 h-28 sm:w-36 sm:h-36 md:w-44 md:h-44 lg:w-52 lg:h-52 rounded-2xl bg-voidRaised border border-white/10 flex items-center justify-center overflow-hidden"></div>
             </div>
         </div>
@@ -105,7 +116,7 @@
             <div id="swapButtonContainer" class="hidden">
                 <button type="button" onclick="handleSwapButtonClick()" class="px-4 py-2 rounded-full bg-voidRaised border border-white/10 font-semibold text-sm hover:bg-white/5 transition">Swap</button>
             </div>
-            <div id="moveButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md"></div>
+            <div id="moveButtons" class="grid grid-cols-2 gap-2 sm:gap-3 w-full max-w-md"></div>
         </div>
 
         <!-- EVENT TOAST (centered, min. read time enforced in JS) -->
@@ -126,7 +137,7 @@
 
     <!-- TEAM PICKER MODAL -->
     <div id="teamPickerModal" class="team-picker-overlay fixed inset-0 z-[60] items-center justify-center px-4" onclick="handleTeamPickerOverlayClick(event)">
-        <div class="team-picker-card w-full max-w-[640px] max-h-[80vh] overflow-y-auto rounded-2xl bg-void border border-white/10 p-6">
+        <div class="team-picker-card w-full max-w-[640px] max-h-[85dvh] overflow-y-auto rounded-2xl bg-void border border-white/10 p-4 sm:p-6">
             <div class="flex items-center justify-between mb-1">
                 <h2 class="font-display text-xl font-bold">Choose your team</h2>
                 <button type="button" onclick="closeTeamPicker()" class="text-inkSoft hover:text-beige text-2xl leading-none" aria-label="Close">&times;</button>
@@ -139,8 +150,8 @@
     </div>
 
     <!-- CARD DETAIL MODAL -->
-    <div id="cardDetailModal" class="detail-modal-overlay fixed inset-0 z-[70] items-center justify-center px-4" onclick="handleDetailOverlayClick(event)">
-        <div id="detailModalContent" class="detail-modal-card w-full max-w-[320px]"></div>
+    <div id="cardDetailModal" class="detail-modal-overlay fixed inset-0 z-[70] overflow-y-auto p-4" onclick="handleDetailOverlayClick(event)">
+        <div id="detailModalContent" class="detail-modal-card m-auto w-full max-w-[320px]"></div>
     </div>
 
     <script src="cards.js"></script>
