@@ -1,27 +1,15 @@
-// =====================================================================
-// AUDIO — background music + pack-pull sound effects
-//
-// Loaded on every page. It builds its own volume control (injected
-// under the header), so pages only need the <script> tag.
-//
-// A note on "keeps playing across pages": this is a multi-page site, and
-// browsers stop all audio when a new page loads. So instead of one
-// unbroken track, each page saves the song's position + settings to
-// localStorage as you leave, and the next page picks up from that spot.
-// Expect a very brief blip during navigation, not a restart.
-// =====================================================================
-
-// =====================================================================
-// EASY CUSTOMIZATION ZONE
-// =====================================================================
+// Loaded on every page; builds its own volume control under the header.
+// Browsers stop audio on navigation, so instead of one unbroken track,
+// each page saves the song's position/settings to localStorage as you
+// leave, and the next page resumes from that spot (a brief blip, not a
+// restart, during navigation).
 
 const AUDIO_CONFIG = {
     musicSrc: "sfx/bg_music.mp3",
-    battleMusicSrc: "sfx/battle_music.mp3", // swaps in for bgMusic while a fight is in progress
-    defaultMusicVolume: 0.3, // 0-1, used until the visitor moves the slider
-    sfxVolume: 1,            // 0-1, fixed (the slider only controls the music)
+    battleMusicSrc: "sfx/battle_music.mp3",
+    defaultMusicVolume: 0.3,
+    sfxVolume: 1,
 
-    // Which sound plays when a card of each rarity is pulled.
     pullSfx: {
         common: "sfx/common_rare.mp3",
         uncommon: "sfx/common_rare.mp3",
@@ -30,22 +18,17 @@ const AUDIO_CONFIG = {
         legendary: "sfx/epic_legendary.mp3",
     },
 
-    // Battle sound effects.
     battleSfx: {
-        click: "sfx/click_sound.mp3",         // menu taps: swap, cancel, exit, opening a card's details
-        heal: "sfx/heal.mp3",                 // any heal-type move (HP restore or cleanse)
-        attackUtility: "sfx/attackutility_sound.mp3", // damage hits (either side) + utility moves
-        victory: "sfx/victory.mp3",           // battle won
+        click: "sfx/click_sound.mp3",
+        heal: "sfx/heal.mp3",
+        attackUtility: "sfx/attackutility_sound.mp3",
+        victory: "sfx/victory.mp3",
     },
 
     // If the previous page saved its position less than this long ago (ms),
-    // we assume you just navigated and skip ahead to cover the page load.
+    // assume we just navigated and skip ahead to cover the page load.
     resumeWindowMs: 10000,
 };
-
-// =====================================================================
-// SAVED SETTINGS (localStorage)
-// =====================================================================
 
 const AUDIO_STORAGE_KEY = "catTCG_audio";
 
@@ -73,7 +56,6 @@ function writeAudioSettings() {
             volume: audioSettings.volume,
             muted: audioSettings.muted,
             playing: musicStarted && !bgMusic.paused,
-            // Before the file has loaded, currentTime is meaningless — keep the old spot
             musicTime: bgMusic.readyState >= 1 ? bgMusic.currentTime : initialResumeTime,
             savedAt: Date.now(),
         }));
@@ -82,7 +64,6 @@ function writeAudioSettings() {
     }
 }
 
-// Where in the song this page should start, based on what the last page saved.
 function getResumeTime() {
     const saved = readAudioSettings();
     const elapsedMs = Date.now() - saved.savedAt;
@@ -92,33 +73,29 @@ function getResumeTime() {
     return (Number(saved.musicTime) || 0) + skipAhead;
 }
 
-// =====================================================================
-// BACKGROUND MUSIC
-// =====================================================================
-
 const audioSettings = readAudioSettings();
 const initialResumeTime = getResumeTime();
 
 const bgMusic = new Audio(AUDIO_CONFIG.musicSrc);
 bgMusic.loop = true;
 bgMusic.preload = "auto";
-bgMusic.currentTime = initialResumeTime; // before load, this sets the start position
+bgMusic.currentTime = initialResumeTime;
 
 // Safety net for browsers that ignore the pre-load start position, and for
-// positions past the end of the track: wrap the target back into the loop.
+// positions past the end of the track.
 bgMusic.addEventListener("loadedmetadata", () => {
     if (!isFinite(bgMusic.duration) || bgMusic.duration <= 0) return;
     const target = initialResumeTime % bgMusic.duration;
     if (Math.abs(bgMusic.currentTime - target) > 0.5) {
-        bgMusic.currentTime = target; // also fixes positions that ran past the end of the loop
+        bgMusic.currentTime = target;
     }
 });
 
 let musicStarted = false;
 
-// Browsers block sound until the visitor has interacted with the page, so
-// the first attempt on a fresh visit usually fails. When it does, we show a
-// hint and start the music on the first click / tap / key press instead.
+// Browsers block sound until the visitor interacts with the page, so a
+// fresh visit's first attempt usually fails; when it does, show a hint and
+// start on the first click/tap/key press instead.
 async function startMusic() {
     try {
         await bgMusic.play();
@@ -135,11 +112,9 @@ async function startMusic() {
     }
 }
 
-// These are the input types browsers accept as "the user did something".
 const GESTURE_EVENTS = ["pointerdown", "pointerup", "keydown", "touchend"];
 
 function onFirstGesture(event) {
-    // The speaker button starts the music itself (see its click handler)
     if (event.target.closest && event.target.closest("#musicToggle")) return;
     startMusic();
 }
@@ -152,30 +127,23 @@ function removeGestureListeners() {
     GESTURE_EVENTS.forEach((type) => document.removeEventListener(type, onFirstGesture));
 }
 
-// Keep the saved position fresh, and save precisely as the page is left.
 setInterval(() => writeAudioSettings(), 1000);
 window.addEventListener("pagehide", () => writeAudioSettings());
 document.addEventListener("visibilitychange", () => {
     if (document.hidden) writeAudioSettings();
 });
 
-// Coming back with the Back button can restore the page from the browser's
-// cache with the music stopped — re-sync and start it again.
+// Coming back with the Back button can restore the page from cache with
+// the music stopped — re-sync and start it again.
 window.addEventListener("pageshow", (event) => {
     if (!event.persisted) return;
     bgMusic.currentTime = getResumeTime();
     startMusic();
 });
 
-// =====================================================================
-// BATTLE MUSIC
-// A separate, ephemeral track that swaps in for the ambient background
-// music while a fight is in progress (called from battle-engine.js).
-// It doesn't persist its position across page loads like bgMusic does —
-// it just restarts fresh each battle — but it shares the same volume/mute
-// state, kept in sync via applyAudioSettings() below.
-// =====================================================================
-
+// Separate, ephemeral track that swaps in for the ambient music during a
+// fight. Doesn't persist its position across page loads — it restarts
+// fresh each battle — but shares volume/mute state via applyAudioSettings().
 const battleMusic = new Audio(AUDIO_CONFIG.battleMusicSrc);
 battleMusic.loop = true;
 battleMusic.preload = "auto";
@@ -196,10 +164,6 @@ function stopBattleMusic() {
     }
 }
 
-// =====================================================================
-// PACK-PULL SOUND EFFECTS
-// =====================================================================
-
 const sfxCache = {};
 
 function getSfx(src) {
@@ -210,10 +174,8 @@ function getSfx(src) {
     return sfxCache[src];
 }
 
-// Load the effects up front so they fire instantly when a card is revealed.
 [...new Set([...Object.values(AUDIO_CONFIG.pullSfx), ...Object.values(AUDIO_CONFIG.battleSfx)])].forEach(getSfx);
 
-// Called when a pulled card is revealed. Muting (or a slider at 0) silences this too.
 function playRarityStinger(rarity) {
     if (audioSettings.muted || audioSettings.volume === 0) return;
 
@@ -226,8 +188,6 @@ function playRarityStinger(rarity) {
     sfx.play().catch((error) => console.error("Could not play sound effect:", error));
 }
 
-// Called from battle-engine.js for the battle sound effects above (key is
-// "click" | "heal" | "attackUtility" | "victory"). Same mute/volume rule.
 function playBattleSfx(key) {
     if (audioSettings.muted || audioSettings.volume === 0) return;
 
@@ -239,10 +199,6 @@ function playBattleSfx(key) {
     sfx.currentTime = 0;
     sfx.play().catch((error) => console.error("Could not play sound effect:", error));
 }
-
-// =====================================================================
-// VOLUME CONTROL (built here and injected under the header)
-// =====================================================================
 
 const ICON_VOLUME_ON = `<svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4" aria-hidden="true"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
 
@@ -271,7 +227,6 @@ function buildMusicControl() {
     musicHint = row.querySelector("#musicHint");
 
     musicToggle.addEventListener("click", () => {
-        // If the browser blocked autoplay, the first click just starts the music
         if (!musicStarted) {
             startMusic();
             return;
@@ -283,14 +238,13 @@ function buildMusicControl() {
 
     musicSlider.addEventListener("input", () => {
         audioSettings.volume = Number(musicSlider.value) / 100;
-        if (audioSettings.volume > 0) audioSettings.muted = false; // moving the slider un-mutes
+        if (audioSettings.volume > 0) audioSettings.muted = false;
         applyAudioSettings();
         writeAudioSettings();
         if (!musicStarted) startMusic();
     });
 }
 
-// Pushes the current settings onto the audio element and the control.
 function applyAudioSettings() {
     bgMusic.volume = audioSettings.volume;
     bgMusic.muted = audioSettings.muted;
@@ -308,10 +262,6 @@ function applyAudioSettings() {
 function setMusicHint(visible) {
     if (musicHint) musicHint.classList.toggle("hidden", !visible);
 }
-
-// =====================================================================
-// START
-// =====================================================================
 
 buildMusicControl();
 applyAudioSettings();

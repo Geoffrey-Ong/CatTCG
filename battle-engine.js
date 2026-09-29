@@ -1,35 +1,25 @@
-// =====================================================================
-// EASY CUSTOMIZATION ZONE
-// Battle-specific numbers that don't belong in cards.js (which is
-// shared by Home/Collection too). Everything here is safe to retune.
-// =====================================================================
-
 const BATTLE_CONFIG = {
     startingTreats: 5,
     treatCap: 5,
-    benchTreatRegen: 2,             // per benched (living) cat, once per Owner turn
+    benchTreatRegen: 2,
     defenseMitigationConstant: 100, // mitigation% = defense / (defense + this)
-    eventDisplayMs: 3000,           // minimum time each event toast stays up
+    eventDisplayMs: 3000,
     aftersmell: {
-        procChance: 0.30,   // chance Salmonella Breath inflicts it on the Owner
+        procChance: 0.30,
         damagePerTick: 10,
-        duration: 3,        // ticks (rounds), refreshes rather than stacking
+        duration: 3, // ticks (rounds), refreshes rather than stacking
     },
     gayBeam: {
         instantWinChance: 0.20,
         instantLossChance: 0.10,
-        // remaining probability: nothing happens
     },
 };
 
 // Mechanical behavior for moves whose effect isn't already fully described
-// by their `type` + `power` (from cards.js's MOVE_INFO). A plain "damage"
-// move just deals `power` as raw damage; a plain "heal" move just restores
-// `power` HP to its target — those need nothing listed here.
-//
-// NOTE: Catnip Distribution currently has nothing to cleanse — no Owner
-// inflicts a debuff on your cats yet (Aftersmell only ever lands on the
-// Owner). It's wired up and ready for whenever that changes.
+// by their `type` + `power` from cards.js. A plain "damage"/"heal" move
+// needs nothing listed here.
+// Catnip Distribution currently has nothing to cleanse — no Owner move
+// inflicts a debuff on your cats yet. Wired up for when that changes.
 const MOVE_EFFECTS = {
     "Salmonella Breath": { inflictsAftersmell: true },
     "Catnip Distribution": { cleansesAftersmell: true },
@@ -37,10 +27,6 @@ const MOVE_EFFECTS = {
     "Political Stance": { distractTurns: 1 },
     "Gay Beam": { isGayBeam: true },
 };
-
-// =====================================================================
-// BATTLE STATE
-// =====================================================================
 
 let battleState = null;
 
@@ -63,13 +49,13 @@ function startBattle(ownerId) {
             treats: BATTLE_CONFIG.startingTreats,
             fainted: false,
         })),
-        activeIndex: 0,           // the 1st picked cat auto-deploys first
-        mode: "move",             // "move" | "swap" | "healTarget" | "over"
-        forcedSwapReason: null,   // null | "faint" (fainting is the only forced swap now)
-        pendingMove: null,        // { move, moveIndex } while awaiting a heal target
+        activeIndex: 0,
+        mode: "move", // "move" | "swap" | "healTarget" | "over"
+        forcedSwapReason: null, // null | "faint"
+        pendingMove: null, // { move, moveIndex } while awaiting a heal target
         eventQueue: [],
-        inputLocked: false,       // true while an event toast is on screen
-        result: null,             // null | "win" | "loss"
+        inputLocked: false,
+        result: null, // null | "win" | "loss"
     };
 
     document.getElementById("siteHeader").classList.add("hidden");
@@ -86,7 +72,7 @@ function endBattle() {
     document.getElementById("battleLobby").classList.remove("hidden");
     document.getElementById("siteHeader").classList.remove("hidden");
     stopBattleMusic();
-    renderAll(); // refresh the lobby's team slots (treats/HP reset each fight, team picks don't)
+    renderAll();
 }
 
 function handleExitBattle() {
@@ -97,8 +83,8 @@ function handleExitBattle() {
     endBattle();
 }
 
-// mitigation% = defense / (defense + K), so defense always helps but
-// never reaches 100% reduction. Always deals at least 1 damage.
+// mitigation% = defense / (defense + K), so defense always helps but never
+// reaches 100% reduction. Always deals at least 1 damage.
 function mitigate(power, defense) {
     const mitigationPercent = defense / (defense + BATTLE_CONFIG.defenseMitigationConstant);
     return Math.max(1, Math.round(power * (1 - mitigationPercent)));
@@ -114,21 +100,13 @@ function livingBenchIndexes() {
         .filter((index) => index !== battleState.activeIndex && !battleState.team[index].fainted);
 }
 
-// =====================================================================
-// EVENT QUEUE
-// Every notable thing that happens (damage, heals, status changes) gets
-// queued as a message and shown one at a time, front and center, for at
-// least BATTLE_CONFIG.eventDisplayMs each. Input stays locked the whole
-// time so nothing can be clicked mid-sequence.
-// =====================================================================
-
 function queueEvent(message, effect) {
     battleState.eventQueue.push({ message, effect: effect || null });
 }
 
-// Runs a batch of state changes (already applied) through the event
-// queue, then either ends the battle or continues into `nextStep` once
-// every message has had its time on screen.
+// Runs a batch of already-applied state changes through the event queue,
+// then ends the battle or continues into nextStep once every message has
+// had its time on screen.
 function afterAction(nextStep) {
     battleState.inputLocked = true;
     renderBattleScreen();
@@ -137,7 +115,7 @@ function afterAction(nextStep) {
         battleState.inputLocked = false;
         if (battleState.result) {
             battleState.mode = "over";
-            battleMusic.pause(); // let the game-over screen (and victory fanfare) be heard clearly
+            battleMusic.pause();
             if (battleState.result === "win") playBattleSfx("victory");
             renderBattleScreen();
             return;
@@ -163,7 +141,7 @@ function showNextQueuedEvent(onComplete) {
     playBattleEffect(effect);
 
     setTimeout(() => {
-        if (!battleState) return; // battle was exited mid-toast
+        if (!battleState) return;
 
         if (battleState.eventQueue.length > 0) {
             showNextQueuedEvent(onComplete);
@@ -174,14 +152,6 @@ function showNextQueuedEvent(onComplete) {
         }
     }, BATTLE_CONFIG.eventDisplayMs);
 }
-
-// =====================================================================
-// ANIMATIONS
-// Pure visual layer — none of this affects battle state. Re-triggering
-// a CSS animation on the same persistent element needs a class removal
-// + reflow before re-adding it, since browsers won't restart an
-// animation just because the class is already present.
-// =====================================================================
 
 function triggerAnimation(el, className, durationMs) {
     if (!el) return;
@@ -235,16 +205,12 @@ function playBattleEffect(effect) {
     }
 }
 
-// =====================================================================
-// PLAYER TURN
-// =====================================================================
-
 function handleMoveClick(moveIndex) {
     if (!battleState || battleState.inputLocked || battleState.mode !== "move") return;
 
     const fighter = activeFighter();
     const move = fighter.card.moves[moveIndex];
-    if (move.treatCost > fighter.treats) return; // guard — button should already be disabled
+    if (move.treatCost > fighter.treats) return;
 
     const effects = MOVE_EFFECTS[move.name] || {};
     const needsHealTarget = move.type === "heal" && !effects.cleansesAftersmell;
@@ -322,10 +288,6 @@ function resolvePlayerMove(move, healTargetIndex) {
     afterAction(() => ownerTurn());
 }
 
-// =====================================================================
-// SWAPPING
-// =====================================================================
-
 function handleSwapButtonClick() {
     if (!battleState || battleState.inputLocked || battleState.mode !== "move") return;
     playBattleSfx("click");
@@ -335,7 +297,7 @@ function handleSwapButtonClick() {
 }
 
 function cancelSwap() {
-    if (!battleState || battleState.inputLocked || battleState.forcedSwapReason) return; // can't back out of a forced swap
+    if (!battleState || battleState.inputLocked || battleState.forcedSwapReason) return;
     playBattleSfx("click");
     battleState.mode = "move";
     renderBattleScreen();
@@ -352,16 +314,12 @@ function handleSwapTargetClick(targetIndex) {
     queueEvent(`${activeFighter().card.name} is sent out!`, { target: targetIndex, type: "swapIn" });
 
     if (wasFaintForced) {
-        afterAction(() => {}); // fainting wasn't your choice — no turn lost, just wait out the toast
+        afterAction(() => {}); // not your choice — no turn lost, just wait out the toast
         return;
     }
 
     afterAction(() => ownerTurn());
 }
-
-// =====================================================================
-// OWNER'S TURN
-// =====================================================================
 
 function ownerTurn() {
     if (!battleState || battleState.result) return;
@@ -379,8 +337,8 @@ function ownerTurn() {
         queueEvent(`${owner.data.name} attacks ${fighter.card.name} for ${dmg} damage!`, { target: battleState.activeIndex, type: "damage", amount: dmg, alsoFaints: causesFaint });
     }
 
-    // Aftersmell ticks after the Owner's turn regardless of whether it
-    // actually acted this round — it's a clock, not a reaction.
+    // Ticks after the Owner's turn regardless of whether it acted — it's a
+    // clock, not a reaction.
     if (owner.aftersmell) {
         owner.hp = Math.max(0, owner.hp - BATTLE_CONFIG.aftersmell.damagePerTick);
         owner.aftersmell.turnsLeft -= 1;
@@ -402,7 +360,6 @@ function ownerTurn() {
                 battleState.mode = "swap";
                 battleState.forcedSwapReason = "faint";
             }
-            // If bench is empty too, checkBattleOver() already caught the loss.
         }
         renderBattleScreen();
     });
@@ -419,10 +376,6 @@ function checkBattleOver() {
         queueEvent("Your whole team has fainted...");
     }
 }
-
-// =====================================================================
-// RENDERING
-// =====================================================================
 
 function hpBarColor(percent) {
     if (percent > 50) return "bg-rarityUncommon";
@@ -476,14 +429,9 @@ function renderPartyCards() {
     wirePartyCardClicks();
 }
 
-// Thinner, taller cards (same 5:7 proportions as the Collection page)
-// instead of the old short-and-wide slot style. sizeClass scales up at
-// each breakpoint so cards fill the extra room on bigger screens.
-//
-// Split into an outer wrapper (click target + animation/floating-number
-// host, no overflow clipping) and an inner card (the rounded, clipped
-// visual) so shake/flash/faint animations and floating numbers aren't
-// cut off by the image's rounded corners.
+// Outer wrapper (click target + animation/floating-number host, no overflow
+// clipping) around an inner card (the rounded, clipped visual) so shake/
+// flash/faint animations aren't cut off by the image's rounded corners.
 function partyCardHTML(fighter, index, isActive, sizeClass) {
     const rarity = RARITY_STYLES[fighter.card.rarity];
     const isHealTarget = battleState.mode === "healTarget" && !fighter.fainted;
@@ -505,8 +453,6 @@ function partyCardHTML(fighter, index, isActive, sizeClass) {
     `;
 }
 
-// Actual snack icons instead of plain dots — full color for a treat you
-// have, faded for one you've spent. Scales up alongside the cards.
 function treatIconsHTML(current) {
     return Array.from({ length: BATTLE_CONFIG.treatCap })
         .map((_, i) => `<span class="${i < current ? "text-orange" : "text-ink/25"}">${iconHTML(TREAT_ICON, "w-2 h-2 sm:w-2.5 sm:h-2.5 md:w-3 md:h-3")}</span>`)
@@ -533,7 +479,7 @@ function wirePartyCardClicks() {
             if (battleState.inputLocked) return;
 
             if (battleState.mode === "healTarget" && !fighter.fainted) {
-                handleHealTargetClick(index); // heal.mp3 plays as the move resolves — no separate click needed
+                handleHealTargetClick(index);
             } else if (battleState.mode === "swap" && index !== battleState.activeIndex && !fighter.fainted) {
                 playBattleSfx("click");
                 handleSwapTargetClick(index);

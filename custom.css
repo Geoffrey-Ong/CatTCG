@@ -1,6 +1,4 @@
-/* =====================================================================
-   MARQUEE (Home page)
-   ===================================================================== */
+/* Marquee (Home page) */
 
 .marquee-wrap {
     overflow: hidden;
@@ -25,9 +23,7 @@
     to { transform: translateX(-50%); } /* -50% because the card list is duplicated once */
 }
 
-/* =====================================================================
-   MODAL SHOW/HIDE + FADE (Tailwind handles everything else about these)
-   ===================================================================== */
+/* Modal show/hide + fade */
 
 .pack-modal-overlay,
 .detail-modal-overlay,
@@ -74,10 +70,7 @@
     transform: translateY(30px);
 }
 
-/* =====================================================================
-   3D CARD FLIP (Tailwind has no utilities for backface-visibility
-   or transform-style: preserve-3d)
-   ===================================================================== */
+/* 3D card flip (no Tailwind utility for backface-visibility / preserve-3d) */
 
 .reveal-card-inner {
     width: 260px;
@@ -112,19 +105,13 @@
     transform: rotateY(180deg);
 }
 
-/* =====================================================================
-   RARITY GLOW
-   Kept as classes (rather than inline Tailwind arbitrary shadows)
-   since the same three values are reused across several places.
-   ===================================================================== */
+/* Rarity glow — kept as classes since these three values repeat in several places */
 
 .glow-rare { box-shadow: 0 0 16px rgba(93, 143, 194, 0.4); }
 .glow-epic { box-shadow: 0 0 20px rgba(179, 111, 191, 0.45); }
 .glow-legendary { box-shadow: 0 0 24px rgba(232, 150, 61, 0.55); }
 
-/* =====================================================================
-   API STATUS LED (header, every page)
-   ===================================================================== */
+/* API status LED (header, every page) */
 
 .status-led {
     width: 10px;
@@ -157,13 +144,8 @@
     .status-led.checking { animation: none; }
 }
 
-/* =====================================================================
-   ICONS
-   The PNGs are solid black on transparent. Used as a mask over a
-   currentColor background, so an icon takes on the text color of
-   whatever it sits in (same technique as the Cat Takers hero icons).
-   The mask-image itself is set inline per icon (see iconHTML in shared.js).
-   ===================================================================== */
+/* Icons — PNG mask over currentColor, so an icon inherits its parent's
+   text color. mask-image is set inline per icon (see iconHTML in shared.js). */
 
 .icon {
     display: inline-block;
@@ -177,12 +159,8 @@
     mask-size: contain;
 }
 
-/* =====================================================================
-   HOVER TOOLTIP
-   Add class "has-tooltip" + data-tooltip="text" to any element that is
-   already positioned (relative/absolute) and it gets a label on hover,
-   keyboard focus, or tap. Sits below the element, right-aligned.
-   ===================================================================== */
+/* Hover tooltip — add class "has-tooltip" + data-tooltip="text" to any
+   positioned element for a label on hover, keyboard focus, or tap. */
 
 .has-tooltip::after {
     content: attr(data-tooltip);
@@ -219,12 +197,8 @@
     #moveButtons .has-tooltip::after { display: none; }
 }
 
-/* =====================================================================
-   BATTLE ANIMATIONS
-   All triggered from JS by adding/removing these classes, except
-   .banner-pop which is static (its parent toggles display:none, and a
-   CSS animation naturally replays once an element re-enters layout).
-   ===================================================================== */
+/* Battle animations — triggered from JS by adding/removing these classes,
+   except .banner-pop, which replays naturally when its parent un-hides. */
 
 @keyframes shake-hit {
     10%, 90% { transform: translateX(-2px); }

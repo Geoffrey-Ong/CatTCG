@@ -26,9 +26,6 @@ function renderProgress() {
     document.getElementById("progressFill").style.width = `${percent}%`;
 }
 
-// Per-tier "owned / total" counts (e.g. Rare 4/7). Totals come from the
-// full generated card list, so they update automatically if rarity odds
-// in cards.js change or new cats are added to the API.
 function renderRarityBreakdown() {
     const unlockedIds = getCollection().unlockedIds;
 

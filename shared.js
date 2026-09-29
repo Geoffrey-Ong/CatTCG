@@ -1,26 +1,22 @@
 const API_ROOT_URL = "https://cat-api-maxingthesequel.vercel.app";
 const API_URL = `${API_ROOT_URL}/api/v1`;
-const API_HEALTH_URL = `${API_ROOT_URL}/health`; // the one route that needs no API key
+const API_HEALTH_URL = `${API_ROOT_URL}/health`;
 
-// Each frontend authenticates with its own key (see index.py's API_KEYS).
-// Both are still accepted on the /cats routes today since Home and Battle
-// both need cat data, but keeping them separate means a future battle-only
-// route can be locked down to just BATTLE_API_KEY without touching Home.
-const COLLECTION_API_KEY = "catTCGcollection-api-key-6767";   // used by loadAllCards() (Home / Collection)
-const BATTLE_API_KEY = "catTCGbattle-api-key-4242";    // used by loadAllCardsAsBattle() (Battle Owners)
+// Separate keys per frontend so a future battle-only route could be locked
+// down to just BATTLE_API_KEY without touching Home.
+const COLLECTION_API_KEY = "catTCGcollection-api-key-6767";
+const BATTLE_API_KEY = "catTCGbattle-api-key-4242";
 
 const COLLECTION_FETCH_OPTIONS = { headers: { "x-api-key": COLLECTION_API_KEY } };
 const BATTLE_FETCH_OPTIONS = { headers: { "x-api-key": BATTLE_API_KEY } };
 
-const API_STATUS_POLL_INTERVAL_MS = 30000; // how often the LED re-checks the API
-const API_STATUS_TIMEOUT_MS = 6000;        // a check slower than this counts as "offline"
+const API_STATUS_POLL_INTERVAL_MS = 30000;
+const API_STATUS_TIMEOUT_MS = 6000;
 
 let allCards = [];
-let lastFetchedCatData = null;   // raw cat objects from the most recent load (live API or cache file)
-let usingCachedCatData = false;  // true when allCards came from cache/cats.json, not the live API
+let lastFetchedCatData = null;
+let usingCachedCatData = false;
 
-// Bundled JSON file used when the live API can't be reached. Replace this
-// file whenever you want fresher cat data.
 const CACHE_FILE_URL = "cache/cats.json";
 
 // Try the live API first; if it fails, read the bundled JSON file instead.
@@ -34,14 +30,13 @@ async function fetchCatsWithFallback(fetchOptions) {
     } catch (apiError) {
         console.warn("API unavailable, using cache file:", apiError);
         const response = await fetch(CACHE_FILE_URL);
-        if (!response.ok) throw apiError; // no cache file either
+        if (!response.ok) throw apiError;
         const data = await response.json();
         usingCachedCatData = true;
         return data.cats;
     }
 }
 
-// Used by the Home / Collection page.
 async function loadAllCards() {
     const cats = await fetchCatsWithFallback(COLLECTION_FETCH_OPTIONS);
     lastFetchedCatData = cats;
@@ -49,7 +44,6 @@ async function loadAllCards() {
     return allCards;
 }
 
-// Used by the Battle page (Owners / fights).
 async function loadAllCardsAsBattle() {
     const cats = await fetchCatsWithFallback(BATTLE_FETCH_OPTIONS);
     lastFetchedCatData = cats;
@@ -62,14 +56,8 @@ function getUnlockedCards() {
     return allCards.filter((card) => collection.unlockedIds.includes(card.id));
 }
 
-// =====================================================================
-// SHARED CARD TILE MARKUP
-// Used by the Collection grid, Inventory grid, and Home marquee — one
-// definition means a style tweak only has to happen in one place.
-// =====================================================================
-
-// widthClass defaults to filling its grid cell; pass a fixed width
-// (e.g. "w-[150px]") for contexts like the marquee that aren't a grid.
+// widthClass defaults to filling its grid cell; pass a fixed width (e.g.
+// "w-[150px]") for non-grid contexts like the marquee.
 function cardTileHTML(card, widthClass = "w-full") {
     const rarity = RARITY_STYLES[card.rarity];
     const roleLabel = ROLE_LABELS[card.role] || card.role;
@@ -99,10 +87,6 @@ function lockedTileHTML() {
     `;
 }
 
-// Attaches click-to-open-detail behavior to every rendered card tile
-// inside a container, using each tile's data-card-id to look up the
-// full card object (locked tiles have no data-card-id, so they're
-// automatically skipped).
 function wireCardTileClicks(container) {
     container.querySelectorAll(".card-tile[data-card-id]").forEach((tile) => {
         const card = allCards.find((c) => c.id === Number(tile.dataset.cardId));
@@ -110,14 +94,12 @@ function wireCardTileClicks(container) {
     });
 }
 
-// Renders a recolorable icon (see .icon in custom.css). It inherits the
-// surrounding text color, so tint it with a text-* class on a parent.
+// Recolorable icon (see .icon in custom.css) — inherits the surrounding
+// text color, so tint it with a text-* class on a parent.
 function iconHTML(src, sizeClass = "w-4 h-4") {
     return `<span class="icon ${sizeClass}" style="-webkit-mask-image: url('${src}'); mask-image: url('${src}');" aria-hidden="true"></span>`;
 }
 
-// One snack icon per treat a move costs; a free move shows "Free" text
-// instead of a zero-icon row.
 function treatCostHTML(treatCost) {
     if (!treatCost) {
         return `<span class="text-[11px] font-bold text-inkSoft">Free</span>`;
@@ -125,17 +107,11 @@ function treatCostHTML(treatCost) {
     return `<span class="flex items-center gap-0.5">${iconHTML(TREAT_ICON, "w-3.5 h-3.5").repeat(treatCost)}</span>`;
 }
 
-// =====================================================================
-// CARD DETAIL MODAL (shared by every page that shows unlocked cards)
-// =====================================================================
-
 function openDetailModal(card) {
     const rarity = RARITY_STYLES[card.rarity];
     const roleLabel = ROLE_LABELS[card.role] || card.role;
     const roleIcon = ROLE_ICONS[card.role];
 
-    // One box per entry in card.stats, so adding a stat later only means
-    // adding it in cards.js (and a label in STAT_LABELS).
     const statsHTML = Object.entries(card.stats).map(([key, value]) => `
         <div class="flex items-baseline justify-between rounded-lg bg-black/5 px-3 py-1.5">
             <span class="flex items-center gap-1.5 text-xs font-bold text-inkSoft">
@@ -155,8 +131,6 @@ function openDetailModal(card) {
         </div>
     `).join("");
 
-    // Layout follows a physical trading card: rarity + role tabs sitting on
-    // the top edge, name, art window, stats, moves, then flavor text.
     document.getElementById("detailModalContent").innerHTML = `
         <div class="relative flex flex-col gap-3 aspect-[5/7] rounded-[18px] border-4 ${rarity.border} ${rarity.glow} bg-beige text-ink px-4 pt-6 pb-4">
             <span class="absolute -top-3.5 left-4 flex items-center h-7 px-3.5 rounded-full text-xs font-bold text-white ${rarity.badge}">${RARITY_LABELS[card.rarity]}</span>
@@ -187,7 +161,7 @@ function openDetailModal(card) {
 
 function closeDetailModal() {
     const modal = document.getElementById("cardDetailModal");
-    if (!modal) return; // page has no detail modal (e.g. Battle)
+    if (!modal) return;
     modal.classList.remove("active");
     modal.classList.add("closing");
 
@@ -208,13 +182,6 @@ document.addEventListener("keydown", (event) => {
     }
 });
 
-// =====================================================================
-// API STATUS LED
-// A small dot in every page's header: green = /health responded OK,
-// red = it failed or timed out, pulsing gray = check in progress.
-// Uses /health (no API key, no cats fetched) so polling stays cheap.
-// =====================================================================
-
 const API_STATUS_LABELS = {
     checking: "Checking…",
     online: "API online",
@@ -225,7 +192,7 @@ function setApiStatus(state) {
     const led = document.getElementById("apiStatusLed");
     const label = document.getElementById("apiStatusLabel");
     const wrapper = document.getElementById("apiStatus");
-    if (!led || !label || !wrapper) return; // page has no LED markup
+    if (!led || !label || !wrapper) return;
 
     led.className = `status-led ${state}`;
     label.textContent = API_STATUS_LABELS[state];
@@ -251,10 +218,9 @@ function startApiStatusMonitor() {
 
     checkApiStatus();
     setInterval(() => {
-        if (!document.hidden) checkApiStatus(); // don't poll from background tabs
+        if (!document.hidden) checkApiStatus();
     }, API_STATUS_POLL_INTERVAL_MS);
 
-    // Coming back to the tab: refresh right away instead of waiting for the next tick
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden) checkApiStatus();
     });

@@ -1,9 +1,5 @@
 let pendingPackCard = null;
 
-// =====================================================================
-// INIT
-// =====================================================================
-
 async function init() {
     try {
         await loadAllCards();
@@ -17,22 +13,12 @@ async function init() {
     }
 }
 
-// Renders every section of the Home page that depends on card data:
-// the owned-cards marquee up top, plus the collection progress, rarity
-// breakdown, and full grid that used to live on their own page.
 function renderAll() {
     renderMarquee();
     renderProgress();
     renderRarityBreakdown();
     renderCardGrid();
 }
-
-// Lets the "Load from file" button (in shared.js) refresh this page after an import
-window.onCatDataUpdated = renderAll;
-
-// =====================================================================
-// MARQUEE (only shows cats you actually own)
-// =====================================================================
 
 function renderMarquee() {
     const track = document.getElementById("marqueeTrack");
@@ -43,15 +29,11 @@ function renderMarquee() {
         return;
     }
 
-    // Duplicate the list once so the CSS animation (translateX -50%) loops seamlessly
+    // Duplicated once so the CSS animation (translateX -50%) loops seamlessly
     const tilesHTML = unlockedCards.map((card) => cardTileHTML(card, "w-[150px]")).join("");
     track.innerHTML = tilesHTML + tilesHTML;
     wireCardTileClicks(track);
 }
-
-// =====================================================================
-// COLLECTION SECTION (moved here from the old collection.html/collection.js)
-// =====================================================================
 
 function renderProgress() {
     const collection = getCollection();
@@ -65,9 +47,6 @@ function renderProgress() {
     document.getElementById("progressFill").style.width = `${percent}%`;
 }
 
-// Per-tier "owned / total" counts (e.g. Rare 4/7). Totals come from the
-// full generated card list, so they update automatically if rarity odds
-// in cards.js change or new cats are added to the API.
 function renderRarityBreakdown() {
     const unlockedIds = getCollection().unlockedIds;
 
@@ -98,10 +77,6 @@ function renderCardGrid() {
     wireCardTileClicks(grid);
 }
 
-// =====================================================================
-// PACK OPENING
-// =====================================================================
-
 document.getElementById("openPackButton").addEventListener("click", () => {
     if (allCards.length === 0) return;
 
@@ -130,10 +105,10 @@ function flipRevealCard() {
     if (!pendingPackCard) return;
 
     const flipper = document.getElementById("revealCardFlipper");
-    if (flipper.classList.contains("flipped")) return; // already revealed
+    if (flipper.classList.contains("flipped")) return;
 
     flipper.classList.add("flipped");
-    playRarityStinger(pendingPackCard.rarity); // on reveal, not on open, so it doesn't spoil the rarity
+    playRarityStinger(pendingPackCard.rarity); // on reveal, not open, so it doesn't spoil the rarity
     unlockCard(pendingPackCard.id);
     document.getElementById("packModalHint").textContent = "Added to your collection!";
 }
@@ -148,7 +123,7 @@ function closePackModal() {
     }, 350);
 
     pendingPackCard = null;
-    renderAll(); // picks up the newly unlocked card in the marquee AND the collection section
+    renderAll();
 }
 
 function handlePackOverlayClick(event) {

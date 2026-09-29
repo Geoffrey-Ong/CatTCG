@@ -1,20 +1,14 @@
-// =====================================================================
-// EASY CUSTOMIZATION ZONE
-// Every number that affects card stats, rarity odds, or pack odds lives
-// here. Change values in this section — nothing below it needs to change.
-// =====================================================================
-
 // Formulas: final stat = base + (real trait × multiplier, where present) + random(0..range)
 const STAT_CONFIG = {
     hp: {
         base: 45,
-        friendlinessMultiplier: 9, // each point of friendliness_level adds this much HP
+        friendlinessMultiplier: 9,
         randomRange: 12,
     },
     defense: {
         base: 25,
-        healthyBonus: 15,   // bonus if previous_health_conditions is "None"
-        unhealthyBonus: 5,  // bonus otherwise
+        healthyBonus: 15,
+        unhealthyBonus: 5,
         randomRange: 20,
     },
 };
@@ -26,19 +20,15 @@ const RARITY_THRESHOLDS = {
     epic: 0.85,
     rare: 0.65,
     uncommon: 0.35,
-    // anything below "uncommon" is common
 };
 
 const RARITY_SCORE_BONUS = {
-    notForAdoption: 0.15,      // added if good_for_adoption is "No"
-    intenseDescription: 0.2,   // added if an INTENSE_WORDS match is found
+    notForAdoption: 0.15,
+    intenseDescription: 0.2,
 };
 
-// Words that, if found in a cat's description/likes/dislikes, push its
-// rarity score up by RARITY_SCORE_BONUS.intenseDescription.
 const INTENSE_WORDS = ["devil", "damned", "possessed", "stab", "anger", "evil", "souls", "political"];
 
-// Relative odds of pulling each rarity tier from a pack. Higher = more common.
 const RARITY_PULL_WEIGHTS = {
     common: 50,
     uncommon: 25,
@@ -47,13 +37,8 @@ const RARITY_PULL_WEIGHTS = {
     legendary: 3,
 };
 
-// -----------------------------------------------------------------
-// CUSTOM MOVES
-// Two moves per cat, keyed by the cat's id from the API. Edit names
-// and power values freely — nothing here is auto-generated.
-// Any cat whose id isn't listed here falls back to DEFAULT_MOVES,
-// so adding a new cat to the API won't break anything.
-// -----------------------------------------------------------------
+// Two moves per cat, keyed by the cat's id from the API. Any id not listed
+// here falls back to DEFAULT_MOVES.
 const CUSTOM_MOVES = {
     1:  [{ name: "Salmonella Breath", power: 35 }, { name: "Claw Slash", power: 20 }],       // Whiskers
     2:  [{ name: "Gay Beam", power: 1 }, { name: "Claw Slash", power: 20 }],                // Luna
@@ -77,40 +62,28 @@ const CUSTOM_MOVES = {
     20: [{ name: "Catnip Distribution", power: 20 }, { name: "Claw Slash", power: 20 }],     // Terry
 };
 
-// Used for any cat id not listed in CUSTOM_MOVES above.
 const DEFAULT_MOVES = [
     { name: "Paw Swipe", power: 20 },
     { name: "Hiss", power: 15 },
 ];
 
-// -----------------------------------------------------------------
-// MOVE INFO (hover tooltip text + treat cost)
-// Keyed by move name rather than cat id, since several cats share the
-// same move (e.g. "Claw Slash"). A move with treatCost: 0 renders as
-// "Free" in the detail modal instead of treat icons.
-// -----------------------------------------------------------------
+// Keyed by move name (not cat id) since several cats share a move.
+// treatCost: 0 renders as "Free" instead of treat icons.
 const MOVE_INFO = {
     "Claw Slash": { description: "A basic slashing attack.", treatCost: 1, type: "damage" },
     "Head Bump": { description: "A basic headbutt attack.", treatCost: 0, type: "damage" },
     "Tuna Mukbang": { description: "Heals the cat's HP by devouring tuna.", treatCost: 2, type: "heal" },
     "Catnip Distribution": { description: "Removes any negative status effects (de-buffs).", treatCost: 2, type: "heal" },
     "Cute Eyes": { description: "Distracts the Owner for 2 turns.", treatCost: 2, type: "utility" },
-    // Treat cost not specified in the move notes — defaulted to match the other Utility moves.
     "Gay Beam": { description: "20% chance to instantly defeat the boss, but a 10% chance it backfires and wipes out the whole team.", treatCost: 2, type: "utility" },
     "Political Stance": { description: "Distracts the Owner for 1 turn.", treatCost: 1, type: "utility" },
     "Salmonella Breath": { description: "A damaging attack with a chance to inflict After-smell.", treatCost: 2, type: "damage" },
     "Vase Throw": { description: "A powerful throwing attack.", treatCost: 2, type: "damage" },
 };
 
-// Fallback for any move name not listed in MOVE_INFO above 
 const DEFAULT_MOVE_INFO = { description: "", treatCost: 0, type: "damage" };
 
-// -----------------------------------------------------------------
-// CUSTOM ROLES
-// One role per cat, keyed by the cat's id from the API. Valid roles are
-// the keys of ROLE_LABELS below ("damage", "heal", "utility"). Any cat
-// whose id isn't listed falls back to DEFAULT_ROLE.
-// -----------------------------------------------------------------
+// One role per cat, keyed by id. Valid roles are the keys of ROLE_LABELS.
 const CUSTOM_ROLES = {
     1:  "damage",   // Whiskers
     2:  "utility",  // Luna
@@ -142,7 +115,6 @@ const ROLE_LABELS = {
     utility: "Utility",
 };
 
-// Icon files live in the icons/ folder next to the HTML pages.
 const ROLE_ICONS = {
     damage: "icons/Attack.png",
     heal: "icons/Heal.png",
@@ -154,17 +126,8 @@ const STAT_ICONS = {
     defense: "icons/Defence.png",
 };
 
-const MOVE_POWER_ICON = "icons/Atk.png"; // shown beside each move's power number
-const TREAT_ICON = "icons/snack.png"; // shown once per treat a move costs, in the detail modal
-
-// =====================================================================
-// CARD GENERATION
-// Stats and rarity are derived deterministically from each cat's own id
-// using a seeded random number generator (mulberry32) — so the same cat
-// always produces the same card, every time the page loads, without
-// needing to store the computed values anywhere. Only the *pack draw*
-// (which cat you get) uses true randomness.
-// =====================================================================
+const MOVE_POWER_ICON = "icons/Atk.png";
+const TREAT_ICON = "icons/snack.png";
 
 const RARITY_ORDER = ["common", "uncommon", "rare", "epic", "legendary"];
 
@@ -176,15 +139,11 @@ const RARITY_LABELS = {
     legendary: "Legendary",
 };
 
-// Display names for each stat key in card.stats (used by the detail modal).
 const STAT_LABELS = {
     hp: "HP",
     defense: "Defense",
 };
 
-// Tailwind classes per rarity tier, used when building card markup in JS.
-// "glow" is a small custom class (see custom.css) for tiers dramatic
-// enough to deserve a colored box-shadow.
 const RARITY_STYLES = {
     common: { border: "border-rarityCommon", badge: "bg-rarityCommon", glow: "" },
     uncommon: { border: "border-rarityUncommon", badge: "bg-rarityUncommon", glow: "" },
@@ -193,9 +152,8 @@ const RARITY_STYLES = {
     legendary: { border: "border-rarityLegendary", badge: "bg-rarityLegendary", glow: "glow-legendary" },
 };
 
-// A small, fast seeded PRNG. Calling the returned function repeatedly
-// advances its internal state, giving a repeatable sequence of
-// pseudo-random values for a given seed.
+// Seeded PRNG — same seed always produces the same sequence, so a card's
+// stats/rarity are reproducible without storing them anywhere.
 function mulberry32(seed) {
     return function () {
         seed |= 0;
@@ -218,10 +176,6 @@ function getRole(cat) {
     return CUSTOM_ROLES[cat.id] || DEFAULT_ROLE;
 }
 
-// Rarity leans on real traits: cats not currently up for adoption, or
-// with an intense/villainous streak in their description, skew rarer —
-// ties the rarity system back to the actual data instead of being pure
-// dice rolls.
 function determineRarity(cat, roll) {
     let score = roll();
 
@@ -242,7 +196,6 @@ function determineRarity(cat, roll) {
 }
 
 function generateCard(cat) {
-    // Scramble the id a bit so adjacent ids don't produce visibly similar seeds
     const roll = mulberry32((cat.id * 2654435761) >>> 0);
 
     const rarity = determineRarity(cat, roll);
@@ -272,14 +225,6 @@ function generateCard(cat) {
         moves: getMoves(cat),
     };
 }
-
-// =====================================================================
-// COLLECTION STORAGE (localStorage)
-//
-// Kept behind these functions on purpose — if this later moves to a
-// real backend, only these functions need to change, not every place
-// that calls them.
-// =====================================================================
 
 const COLLECTION_STORAGE_KEY = "catTCG_collection";
 
@@ -314,14 +259,7 @@ function unlockCard(id) {
     return collection;
 }
 
-// =====================================================================
-// BATTLE TEAM STORAGE (localStorage)
-//
-// The 3 cats picked for Battle, in deploy order — index 0 deploys
-// first. Kept in its own key so clearing/rebuilding the Collection
-// never touches the current battle team, and vice versa.
-// =====================================================================
-
+// The 3 cats picked for Battle, in deploy order — index 0 deploys first.
 const BATTLE_TEAM_STORAGE_KEY = "catTCG_battleTeam";
 const BATTLE_TEAM_SIZE = 3;
 
@@ -344,13 +282,7 @@ function saveBattleTeam(cardIds) {
     }
 }
 
-// =====================================================================
-// PACK OPENING
-// =====================================================================
-
-// Weighted random draw across the full card list, using each card's
-// rarity to bias the odds. This is the one place true randomness
-// belongs — everything about the card itself is already fixed.
+// Weighted random draw across the full card list, biased by rarity.
 function drawPackCard(cards) {
     const totalWeight = cards.reduce((sum, card) => sum + RARITY_PULL_WEIGHTS[card.rarity], 0);
     let roll = Math.random() * totalWeight;
@@ -360,5 +292,5 @@ function drawPackCard(cards) {
         if (roll <= 0) return card;
     }
 
-    return cards[cards.length - 1]; // fallback, shouldn't normally hit this
+    return cards[cards.length - 1];
 }

@@ -1,15 +1,10 @@
-// =====================================================================
-// INIT
-// =====================================================================
-
 async function init() {
     try {
         await loadAllCardsAsBattle();
         renderAll();
     } catch (error) {
         console.error(error);
-        document.getElementById("bossList").innerHTML =
-            "Unable to connect to the API. Use \"Load from file\" below if you have a previously exported cache.";
+        document.getElementById("bossList").innerHTML = "Unable to connect to the API.";
     }
 }
 
@@ -17,13 +12,6 @@ function renderAll() {
     renderBosses();
     renderTeamSlots();
 }
-
-// Lets the "Load from file" button (in shared.js) refresh this page after an import
-window.onCatDataUpdated = renderAll;
-
-// =====================================================================
-// BOSSES
-// =====================================================================
 
 function renderBosses() {
     document.getElementById("bossList").innerHTML = OWNERS.map(bossPillHTML).join("");
@@ -55,8 +43,6 @@ function bossPillHTML(owner) {
     `;
 }
 
-// Hands off to battle-engine.js's startBattle(), which swaps the lobby out
-// for the actual battle screen.
 function handleBossPlayClick(ownerId) {
     const owner = OWNERS.find((o) => o.id === ownerId);
     const team = getBattleTeam();
@@ -68,10 +54,6 @@ function handleBossPlayClick(ownerId) {
 
     startBattle(owner.id);
 }
-
-// =====================================================================
-// YOUR TEAM (3 slots, in deploy order)
-// =====================================================================
 
 function renderTeamSlots() {
     const team = getBattleTeam();
@@ -125,10 +107,6 @@ function ordinal(n) {
     return n === 1 ? "1st" : n === 2 ? "2nd" : "3rd";
 }
 
-// =====================================================================
-// TEAM PICKER MODAL
-// =====================================================================
-
 function openTeamPicker() {
     renderTeamPickerGrid();
     const modal = document.getElementById("teamPickerModal");
@@ -145,7 +123,7 @@ function closeTeamPicker() {
         modal.classList.remove("closing");
     }, 350);
 
-    renderTeamSlots(); // reflect the final selection behind the modal
+    renderTeamSlots();
 }
 
 function handleTeamPickerOverlayClick(event) {
@@ -197,15 +175,15 @@ function toggleTeamCard(cardId) {
     const idx = team.indexOf(cardId);
 
     if (idx !== -1) {
-        team.splice(idx, 1); // tapping a selected cat again removes it, shifting the rest up
+        team.splice(idx, 1);
     } else {
-        if (team.length >= BATTLE_TEAM_SIZE) return; // already full — ignore the tap
+        if (team.length >= BATTLE_TEAM_SIZE) return;
         team.push(cardId);
     }
 
     saveBattleTeam(team);
-    renderTeamPickerGrid(); // refresh order badges inside the modal
-    renderTeamSlots();      // live-update the slots behind the modal too
+    renderTeamPickerGrid();
+    renderTeamSlots();
 }
 
 document.addEventListener("keydown", (event) => {
