@@ -314,7 +314,10 @@ function handleSwapTargetClick(targetIndex) {
     queueEvent(`${activeFighter().card.name} is sent out!`, { target: targetIndex, type: "swapIn" });
 
     if (wasFaintForced) {
-        afterAction(() => {}); // not your choice — no turn lost, just wait out the toast
+        // Not your choice — no turn lost, but the screen still needs a
+        // render once the toast clears (afterAction only auto-renders on
+        // the way in, not on the way out).
+        afterAction(() => renderBattleScreen());
         return;
     }
 
