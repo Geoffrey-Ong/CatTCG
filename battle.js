@@ -26,19 +26,19 @@ function bossPillHTML(owner) {
     const label = DIFFICULTY_LABELS[owner.difficulty] || owner.difficulty;
 
     return `
-        <div class="relative flex items-stretch gap-4 rounded-[28px] bg-voidRaised border border-white/10 p-3 pr-5 ${owner.locked ? "opacity-40" : ""}">
+        <div class="relative flex items-stretch gap-4 rounded-[28px] bg-voidRaised border border-white/10 p-3 pr-5 shadow-md ${owner.locked ? "opacity-40" : "hover-lift"}">
             <div class="w-20 h-20 rounded-2xl bg-voidDeep flex items-center justify-center overflow-hidden shrink-0">
                 ${owner.image
                     ? `<img src="${owner.image}" alt="${owner.name}" class="w-full h-full object-cover object-top">`
-                    : `<span class="text-[10px] font-semibold text-inkSoft">Imag</span>`}
+                    : `<span class="text-2xl opacity-30" aria-hidden="true">🐾</span>`}
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-between py-1">
                 <p class="font-display font-bold text-lg truncate">${owner.name}</p>
-                <span class="self-end inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full text-white ${style.badge}">${label}</span>
+                <span class="badge-ribbon self-end inline-block text-[11px] font-bold py-0.5 text-white ${style.badge}">${label}</span>
             </div>
             ${owner.locked
                 ? `<span class="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/30 flex items-center justify-center text-sm" role="img" aria-label="Locked">🔒</span>`
-                : `<button type="button" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-orange text-voidDeep flex items-center justify-center hover:bg-orangeLight transition" data-boss-play="${owner.id}" aria-label="Battle ${owner.name}">${iconHTML("icons/play.png", "w-4 h-4")}</button>`}
+                : `<button type="button" class="btn-press absolute top-3 right-3 w-9 h-9 rounded-full bg-orange text-voidDeep flex items-center justify-center shadow-md hover:shadow-lg hover:bg-orangeLight transition" data-boss-play="${owner.id}" aria-label="Battle ${owner.name}">${iconHTML("icons/play.png", "w-4 h-4")}</button>`}
         </div>
     `;
 }
@@ -81,7 +81,7 @@ function filledSlotHTML(card, index) {
     const roleIcon = ROLE_ICONS[card.role];
 
     return `
-        <div class="team-slot-filled relative rounded-2xl overflow-hidden border-2 ${rarity.border} ${rarity.glow} bg-beige text-ink flex flex-col cursor-pointer hover:-translate-y-1 transition" data-card-id="${card.id}">
+        <div class="team-slot-filled hover-lift relative rounded-2xl overflow-hidden border-2 ${rarity.border} ${rarity.glow} bg-beige text-ink flex flex-col cursor-pointer shadow-md" data-card-id="${card.id}">
             <span class="absolute top-1.5 left-1.5 z-10 flex items-center justify-center w-5 h-5 rounded-full bg-ink/80 text-beige text-[10px] font-bold" title="Deploys ${ordinal(index + 1)}">${index + 1}</span>
             <span class="has-tooltip absolute top-1.5 right-1.5 z-10 flex items-center justify-center w-5 h-5 rounded-full bg-ink/80 text-beige" data-tooltip="${roleLabel}" tabindex="0" role="img" aria-label="Role: ${roleLabel}">
                 ${roleIcon ? iconHTML(roleIcon, "w-3 h-3") : `<span class="text-[9px] font-bold">${roleLabel.charAt(0)}</span>`}
@@ -96,7 +96,7 @@ function filledSlotHTML(card, index) {
 
 function emptySlotHTML(index) {
     return `
-        <div class="rounded-2xl border-2 border-dashed border-white/15 bg-voidRaised flex flex-col items-center justify-center h-[164px] text-inkSoft">
+        <div class="rounded-2xl border-2 border-dashed border-white/15 bg-voidRaised flex flex-col items-center justify-center h-[164px] text-inkSoft shadow-inner shadow-black/20">
             <span class="text-[10px] font-bold uppercase tracking-wide mb-1">Slot ${index + 1}</span>
             <span class="text-xs">Empty</span>
         </div>
@@ -156,7 +156,7 @@ function teamPickerTileHTML(card, selectionIndex) {
     const roleIcon = ROLE_ICONS[card.role];
 
     return `
-        <div class="team-picker-tile relative aspect-[5/7] rounded-xl overflow-hidden border-2 ${selected ? "border-orange" : rarity.border} ${selected ? "" : rarity.glow} bg-beige text-ink flex flex-col cursor-pointer transition" data-card-id="${card.id}">
+        <div class="team-picker-tile hover-lift relative aspect-[5/7] rounded-xl overflow-hidden border-2 ${selected ? "border-orange shadow-lg shadow-orange/30" : rarity.border} ${selected ? "" : rarity.glow} bg-beige text-ink flex flex-col cursor-pointer" data-card-id="${card.id}">
             <div class="relative flex-1 min-h-0 bg-cover bg-top bg-voidDeep" style="background-image: url('${card.image}')">
                 <span class="has-tooltip absolute top-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-ink/80 text-beige" data-tooltip="${roleLabel}" tabindex="0" role="img" aria-label="Role: ${roleLabel}">
                     ${roleIcon ? iconHTML(roleIcon, "w-3 h-3") : `<span class="text-[9px] font-bold">${roleLabel.charAt(0)}</span>`}

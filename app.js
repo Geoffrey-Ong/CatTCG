@@ -89,7 +89,7 @@ document.getElementById("openPackButton").addEventListener("click", () => {
         <div class="flex-1 min-h-0 bg-cover bg-center" style="background-image: url('${pendingPackCard.image}')"></div>
         <div class="px-3 py-2.5 text-center">
             <p class="text-[15px] font-bold">${pendingPackCard.name}</p>
-            <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${rarity.badge}">${RARITY_LABELS[pendingPackCard.rarity]}</span>
+            <span class="badge-ribbon inline-block text-[10px] font-bold py-0.5 text-white ${rarity.badge}">${RARITY_LABELS[pendingPackCard.rarity]}</span>
         </div>
     `;
 

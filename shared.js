@@ -64,7 +64,7 @@ function cardTileHTML(card, widthClass = "w-full") {
     const roleIcon = ROLE_ICONS[card.role];
 
     return `
-        <div class="card-tile ${widthClass} shrink-0 aspect-[5/7] rounded-2xl overflow-hidden border-2 ${rarity.border} ${rarity.glow} bg-beige text-ink flex flex-col cursor-pointer hover:-translate-y-1 transition" data-card-id="${card.id}">
+        <div class="card-tile hover-lift ${widthClass} shrink-0 aspect-[5/7] rounded-2xl overflow-hidden border-2 ${rarity.border} ${rarity.glow} bg-beige text-ink flex flex-col cursor-pointer shadow-md" data-card-id="${card.id}">
             <div class="relative flex-1 min-h-0 bg-cover bg-center bg-voidDeep" style="background-image: url('${card.image}')">
                 <span class="has-tooltip absolute top-1.5 right-1.5 flex items-center justify-center w-5 h-5 rounded-full bg-ink/80 text-beige" data-tooltip="${roleLabel}" tabindex="0" role="img" aria-label="Role: ${roleLabel}">
                     ${roleIcon ? iconHTML(roleIcon, "w-3 h-3") : `<span class="text-[9px] font-bold">${roleLabel.charAt(0)}</span>`}
@@ -72,7 +72,7 @@ function cardTileHTML(card, widthClass = "w-full") {
             </div>
             <div class="px-2.5 py-2 text-center">
                 <p class="text-[13px] font-bold truncate">${card.name}</p>
-                <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full text-white ${rarity.badge}">${RARITY_LABELS[card.rarity]}</span>
+                <span class="badge-ribbon inline-block text-[10px] font-bold py-0.5 text-white ${rarity.badge}">${RARITY_LABELS[card.rarity]}</span>
             </div>
         </div>
     `;
@@ -80,7 +80,7 @@ function cardTileHTML(card, widthClass = "w-full") {
 
 function lockedTileHTML() {
     return `
-        <div class="w-full aspect-[5/7] rounded-2xl border-2 border-white/10 bg-voidRaised flex flex-col items-center justify-center">
+        <div class="w-full aspect-[5/7] rounded-2xl border-2 border-white/10 bg-voidRaised flex flex-col items-center justify-center shadow-sm">
             <span class="text-3xl text-inkSoft">?</span>
             <span class="text-[11px] text-inkSoft mt-1.5 tracking-wide">Locked</span>
         </div>
@@ -122,7 +122,7 @@ function openDetailModal(card) {
     `).join("");
 
     const movesHTML = card.moves.map((move) => `
-        <div class="has-tooltip relative flex items-center justify-between rounded-lg bg-black/5 px-3 py-2 text-sm" data-tooltip="${move.description}" tabindex="0">
+        <div class="has-tooltip relative flex items-center justify-between rounded-lg bg-black/5 hover:bg-black/10 transition-colors px-3 py-2 text-sm" data-tooltip="${move.description}" tabindex="0">
             <span class="font-semibold">${move.name}</span>
             <span class="flex items-center gap-2.5">
                 <span class="flex items-center gap-1 font-display text-base font-bold text-orange">${iconHTML(ROLE_ICONS[move.type] || MOVE_POWER_ICON, "w-3.5 h-3.5")}${move.power}</span>
@@ -132,9 +132,9 @@ function openDetailModal(card) {
     `).join("");
 
     document.getElementById("detailModalContent").innerHTML = `
-        <div class="relative flex flex-col gap-3 aspect-[5/7] rounded-[18px] border-4 ${rarity.border} ${rarity.glow} bg-beige text-ink px-4 pt-6 pb-4">
-            <span class="absolute -top-3.5 left-4 flex items-center h-7 px-3.5 rounded-full text-xs font-bold text-white ${rarity.badge}">${RARITY_LABELS[card.rarity]}</span>
-            <span class="has-tooltip absolute -top-3.5 right-4 flex items-center justify-center w-7 h-7 rounded-full bg-ink text-beige cursor-default" data-tooltip="${roleLabel}" tabindex="0" role="img" aria-label="Role: ${roleLabel}">
+        <div class="relative flex flex-col gap-3 aspect-[5/7] rounded-[18px] border-4 ${rarity.border} ${rarity.glow} bg-beige text-ink px-4 pt-6 pb-4 shadow-2xl shadow-black/50">
+            <span class="badge-ribbon absolute -top-3.5 left-4 flex items-center h-7 px-3.5 text-xs font-bold text-white shadow-md ${rarity.badge}">${RARITY_LABELS[card.rarity]}</span>
+            <span class="has-tooltip absolute -top-3.5 right-4 flex items-center justify-center w-7 h-7 rounded-full bg-ink text-beige cursor-default shadow-md" data-tooltip="${roleLabel}" tabindex="0" role="img" aria-label="Role: ${roleLabel}">
                 ${roleIcon ? iconHTML(roleIcon) : `<span class="text-xs font-bold">${roleLabel.charAt(0)}</span>`}
             </span>
 

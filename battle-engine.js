@@ -407,14 +407,14 @@ function renderOwnerCard() {
 
     document.getElementById("ownerPortrait").innerHTML = owner.data.image
         ? `<img src="${owner.data.image}" alt="${owner.data.name}" class="w-full h-full object-cover object-top">`
-        : `<span class="text-xs font-semibold text-inkSoft">Imag</span>`;
+        : `<span class="text-4xl opacity-30" aria-hidden="true">🐾</span>`;
 
     const badges = [];
     if (owner.distractedTurns > 0) {
-        badges.push(`<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rarityRare text-white">Distracted (${owner.distractedTurns})</span>`);
+        badges.push(`<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rarityRare text-white shadow-sm">Distracted (${owner.distractedTurns})</span>`);
     }
     if (owner.aftersmell) {
-        badges.push(`<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rarityEpic text-white">Aftersmell (${owner.aftersmell.turnsLeft})</span>`);
+        badges.push(`<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-rarityEpic text-white shadow-sm">Aftersmell (${owner.aftersmell.turnsLeft})</span>`);
     }
     document.getElementById("ownerStatusBadges").innerHTML = badges.join("");
 }
@@ -443,7 +443,7 @@ function partyCardHTML(fighter, index, isActive, sizeClass) {
 
     return `
         <div class="party-card ${sizeClass} relative cursor-pointer" data-fighter-index="${index}">
-            <div class="party-card-inner aspect-[5/7] rounded-2xl overflow-hidden border-2 ${rarity.border} ${isActive ? rarity.glow : ""} bg-beige text-ink flex flex-col transition ${fighter.fainted ? "opacity-30 grayscale" : ""} ${targetable ? "ring-2 ring-orange" : ""}">
+            <div class="party-card-inner ${fighter.fainted ? "" : "hover-lift"} aspect-[5/7] rounded-2xl overflow-hidden border-2 ${rarity.border} ${isActive ? rarity.glow : "shadow-md"} bg-beige text-ink flex flex-col transition ${fighter.fainted ? "opacity-30 grayscale" : ""} ${targetable ? "ring-2 ring-orange shadow-lg shadow-orange/30" : ""}">
                 <div class="relative flex-1 min-h-0 bg-cover bg-top bg-voidDeep" style="background-image: url('${fighter.card.image}')">
                     <span class="absolute top-1 left-1 flex gap-0.5 sm:gap-1">${treatIconsHTML(fighter.treats)}</span>
                 </div>
@@ -527,7 +527,7 @@ function renderMoveControls() {
         const showsPower = move.type === "damage" || (move.type === "heal" && !effects.cleansesAftersmell);
 
         return `
-            <button type="button" ${affordable ? `onclick="handleMoveClick(${index})"` : "disabled"} class="has-tooltip relative flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 text-left border transition ${affordable ? "border-white/10 bg-voidRaised hover:bg-white/5" : "border-white/5 bg-voidRaised/40 opacity-40 cursor-not-allowed"}" data-tooltip="${move.description}" tabindex="0">
+            <button type="button" ${affordable ? `onclick="handleMoveClick(${index})"` : "disabled"} class="has-tooltip ${affordable ? "btn-press" : ""} relative flex flex-col items-start gap-1 rounded-xl px-3 py-2.5 text-left border transition ${affordable ? "border-white/10 bg-voidRaised shadow-sm hover:bg-white/5 hover:shadow-md hover:border-white/20" : "border-white/5 bg-voidRaised/40 opacity-40 cursor-not-allowed"}" data-tooltip="${move.description}" tabindex="0">
                 <span class="font-semibold text-sm">${move.name}</span>
                 <span class="flex items-center gap-2 text-xs text-inkSoft">
                     ${iconHTML(ROLE_ICONS[move.type] || MOVE_POWER_ICON, "w-3 h-3")}${showsPower ? move.power : ""}

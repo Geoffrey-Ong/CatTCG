@@ -1,3 +1,39 @@
+/* Site-wide background texture: a faint paw-print tile + a warm glow at the
+   top of the page, layered under Tailwind's bg-void on <body>. Decorative
+   only (very low opacity), so it never competes with real content. */
+
+body {
+    background-image:
+        radial-gradient(ellipse 900px 460px at 50% -10%, rgba(232, 150, 61, 0.12), transparent 60%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='%23E8963D' fill-opacity='0.05'%3E%3Cellipse cx='60' cy='74' rx='15' ry='18'/%3E%3Cellipse cx='38' cy='50' rx='7' ry='9'/%3E%3Cellipse cx='54' cy='40' rx='7' ry='9'/%3E%3Cellipse cx='70' cy='40' rx='7' ry='9'/%3E%3Cellipse cx='84' cy='52' rx='7' ry='9'/%3E%3C/g%3E%3C/svg%3E");
+    background-repeat: no-repeat, repeat;
+    background-size: 100% 600px, 120px 120px;
+    background-position: top center, top left;
+}
+
+/* Banner-style tag for rarity/difficulty labels — a notched ribbon shape
+   instead of a plain pill, so these read as a distinct "tag" from the
+   round role/status badges elsewhere. */
+.badge-ribbon {
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    padding-left: 0.7rem;
+    padding-right: 0.7rem;
+}
+
+/* Glossy highlight for the site's primary (orange) call-to-action buttons.
+   The gradient is translucent, so button text stays readable underneath. */
+.btn-sheen {
+    position: relative;
+    overflow: hidden;
+}
+.btn-sheen::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(255, 255, 255, 0) 55%);
+    pointer-events: none;
+}
+
 /* Marquee (Home page) */
 
 .marquee-wrap {
@@ -110,6 +146,41 @@
 .glow-rare { box-shadow: 0 0 16px rgba(93, 143, 194, 0.4); }
 .glow-epic { box-shadow: 0 0 20px rgba(179, 111, 191, 0.45); }
 .glow-legendary { box-shadow: 0 0 24px rgba(232, 150, 61, 0.55); }
+
+/* Shared hover/press polish for clickable tiles & buttons across both pages */
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+}
+.hover-lift:active {
+    transform: translateY(-1px) scale(0.98);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.3);
+}
+
+.btn-press {
+    transition: transform 0.15s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.btn-press:active {
+    transform: scale(0.96);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid #E8963D;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hover-lift, .hover-lift:hover, .hover-lift:active, .btn-press, .btn-press:active {
+        transition: none;
+        transform: none;
+    }
+}
 
 /* API status LED (header, every page) */
 
