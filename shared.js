@@ -2,13 +2,10 @@ const API_ROOT_URL = "https://cat-api-maxingthesequel.vercel.app";
 const API_URL = `${API_ROOT_URL}/api/v1`;
 const API_HEALTH_URL = `${API_ROOT_URL}/health`;
 
-// Separate keys per frontend so a future battle-only route could be locked
-// down to just BATTLE_API_KEY without touching Home.
-const COLLECTION_API_KEY = "/api/cats";
-const BATTLE_API_KEY = "/api/battle-cats";
-
-const COLLECTION_FETCH_OPTIONS = { headers: { "x-api-key": COLLECTION_API_KEY } };
-const BATTLE_FETCH_OPTIONS = { headers: { "x-api-key": BATTLE_API_KEY } };
+// The API keys live in Vercel environment variables, behind two small routes
+// in /api. The browser never sees a key.
+const COLLECTION_CATS_URL = "/api/cats";
+const BATTLE_CATS_URL = "/api/battle-cats";
 
 const API_STATUS_POLL_INTERVAL_MS = 30000;
 const API_STATUS_TIMEOUT_MS = 6000;
