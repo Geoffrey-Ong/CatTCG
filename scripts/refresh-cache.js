@@ -9,7 +9,7 @@ const fs = require("fs");
 const path = require("path");
 
 const API_URL = "https://cat-api-maxingthesequel.vercel.app/api/v1/cats";
-const API_KEY = "catTCGcollection-api-key-6767"; // same key shared.js uses
+const API_KEY = process.env.COLLECTION_API_KEY; 
 const OUT_FILE = path.join(__dirname, "..", "cache", "cats.json");
 
 async function main() {

@@ -18,15 +18,16 @@ let lastFetchedCatData = null;
 let usingCachedCatData = false;
 
 const CACHE_FILE_URL = "cache/cats.json";
+const MAX_GAME_CAT_ID = 20; // the game only uses the original 20 cats
 
 // Try the live API first; if it fails, read the bundled JSON file instead.
-async function fetchCatsWithFallback(fetchOptions) {
+async function fetchCatsWithFallback(catsUrl) {
     try {
-        const response = await fetch(`${API_URL}/cats`, fetchOptions);
+        const response = await fetch(catsUrl);
         if (!response.ok) throw new Error("API request failed.");
         const data = await response.json();
         usingCachedCatData = false;
-        return data.cats;
+        return data.cats.filter((cat) => cat.id <= MAX_GAME_CAT_ID);
     } catch (apiError) {
         console.warn("API unavailable, using cache file:", apiError);
         const response = await fetch(CACHE_FILE_URL);
@@ -38,14 +39,14 @@ async function fetchCatsWithFallback(fetchOptions) {
 }
 
 async function loadAllCards() {
-    const cats = await fetchCatsWithFallback(COLLECTION_FETCH_OPTIONS);
+    const cats = await fetchCatsWithFallback(COLLECTION_CATS_URL);
     lastFetchedCatData = cats;
     allCards = cats.map(generateCard);
     return allCards;
 }
 
 async function loadAllCardsAsBattle() {
-    const cats = await fetchCatsWithFallback(BATTLE_FETCH_OPTIONS);
+    const cats = await fetchCatsWithFallback(BATTLE_CATS_URL);
     lastFetchedCatData = cats;
     allCards = cats.map(generateCard);
     return allCards;
