@@ -230,7 +230,7 @@ startApiStatusMonitor();
 // To add or rename a site, edit this list only.
 const SITE_LINKS = [
     { name: "Cat TCG", url: "https://cat-tcg-kappa.vercel.app/", current: true },
-    { name: "CArchive", url: "https://carchive-website.vercel.app/" },
+    { name: "Catchive", url: "https://carchive-website.vercel.app/" },
     { name: "Cat Personality Test", url: "https://catpersonalitytest.vercel.app/" },
 ];
 const OPEN_SITE_LINKS_IN_NEW_TAB = false; // change to true to open links in a new tab
