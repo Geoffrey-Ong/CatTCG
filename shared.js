@@ -4,8 +4,8 @@ const API_HEALTH_URL = `${API_ROOT_URL}/health`;
 
 // Separate keys per frontend so a future battle-only route could be locked
 // down to just BATTLE_API_KEY without touching Home.
-const COLLECTION_API_KEY = "catTCGcollection-api-key-6767";
-const BATTLE_API_KEY = "catTCGbattle-api-key-4242";
+const COLLECTION_API_KEY = "/api/cats";
+const BATTLE_API_KEY = "/api/battle-cats";
 
 const COLLECTION_FETCH_OPTIONS = { headers: { "x-api-key": COLLECTION_API_KEY } };
 const BATTLE_FETCH_OPTIONS = { headers: { "x-api-key": BATTLE_API_KEY } };
