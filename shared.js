@@ -225,3 +225,33 @@ function startApiStatusMonitor() {
 }
 
 startApiStatusMonitor();
+
+// Footer links so the three connected sites lead to each other.
+// To add or rename a site, edit this list only.
+const SITE_LINKS = [
+    { name: "Cat TCG", url: "https://cat-tcg-kappa.vercel.app/", current: true },
+    { name: "CArchive", url: "https://carchive-website.vercel.app/" },
+    { name: "Cat Personality Test", url: "https://catpersonalitytest.vercel.app/" },
+];
+const OPEN_SITE_LINKS_IN_NEW_TAB = false; // change to true to open links in a new tab
+
+function initSiteLinks() {
+    const container = document.getElementById("siteLinks");
+    if (!container) return;
+
+    const base = "inline-block rounded-full px-4 py-2 text-sm font-semibold";
+    const target = OPEN_SITE_LINKS_IN_NEW_TAB ? ' target="_blank" rel="noopener noreferrer"' : "";
+
+    const items = SITE_LINKS.map((site) => {
+        if (site.current) {
+            return `<span aria-current="page" class="${base} border border-white/10 bg-white/5 text-inkSoft">${site.name} · you are here</span>`;
+        }
+        return `<a href="${site.url}"${target} class="${base} btn-press hover-lift bg-orange text-voidDeep no-underline transition hover:bg-orangeLight">${site.name}</a>`;
+    }).join("");
+
+    container.innerHTML = `
+        <p class="mb-3 text-xs uppercase tracking-widest text-inkSoft">Explore our other sites</p>
+        <div class="flex flex-wrap justify-center gap-2">${items}</div>`;
+}
+
+initSiteLinks();
